@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>银盛钱包 · 商户入驻业务流程图</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+    * {
+      font-family: 'Noto Sans SC', 'PingFang SC', -apple-system, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
+
+    .step-card {
+      background: white;
+      border-radius: 16px;
+      padding: 16px 12px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      position: relative;
+      min-width: 100px;
+    }
+
+    .step-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    }
+
+    .step-card.completed {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+    }
+
+    .step-card.current {
+      background: linear-gradient(135deg, #165DFF 0%, #4080FF 100%);
+      color: white;
+      animation: pulse 2s infinite;
+    }
+
+    .step-card.pending {
+      background: #f3f4f6;
+      color: #6b7280;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(22, 93, 255, 0.4); }
+      50% { box-shadow: 0 0 0 10px rgba(22, 93, 255, 0); }
+    }
+
+    .step-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      margin: 0 auto 8px;
+      background: rgba(22, 93, 255, 0.1);
+      color: #165DFF;
+    }
+
+    .step-card.completed .step-number,
+    .step-card.current .step-number {
+      background: rgba(255, 255, 255, 0.3);
+      color: white;
+    }
+
+    .step-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .step-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .step-desc {
+      font-size: 11px;
+      opacity: 0.7;
+    }
+
+    .arrow {
+      color: #d1d5db;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .arrow.active {
+      color: #10b981;
+    }
+
+    .flow-container {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 10px 0;
+    }
+
+    .gateway-card {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+    }
+
+    .merge-point {
+      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+      color: white;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .badge-progress {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .badge-complete {
+      background: #d1fae5;
+      color: #059669;
+    }
+
+    .badge-pending {
+      background: #fef3c7;
+      color: #d97706;
+    }
+
+    .badge-rejected {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .timeline-line {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: #e5e7eb;
+      transform: translateY(-50%);
+      z-index: 0;
+    }
+
+    .timeline-progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #165DFF);
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+
+    .print-area {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+    }
+
+    @media print {
+      body {
+        background: white !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-area {
+        box-shadow: none !important;
+        padding: 0 !important;
+      }
+    }
+
+    .highlight-box {
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      border-left: 4px solid #165DFF;
+      border-radius: 0 12px 12px 0;
+      padding: 16px 20px;
+    }
+
+    .table-simple {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table-simple th,
+    .table-simple td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .table-simple th {
+      background: #f9fafb;
+      font-weight: 600;
+      color: #374151;
+      font-size: 13px;
+    }
+
+    .table-simple td {
+      font-size: 13px;
+      color: #4b5563;
+    }
+
+    .table-simple tr:hover td {
+      background: #f9fafb;
+    }
+  </style>
+</head>
+<body class="p-4 md:p-8">
+  <div class="max-w-6xl mx-auto">
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">
+        银盛钱包 · 商户入驻业务流程图
+      </h1>
+      <p class="text-white text-opacity-80">清晰展示个人账户与商户账户的完整入驻路径</p>
+    </div>
+
+    <!-- 图例 -->
+    <div class="card p-4 mb-6 no-print">
+      <div class="flex flex-wrap items-center justify-center gap-6">
+        <div class="legend-item">
+          <div class="legend-dot bg-gray-200"></div>
+          <span>待完成</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background: linear-gradient(135deg, #165DFF, #4080FF);"></div>
+          <span>当前步骤</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background: linear-gradient(135deg, #10b981, #059669);"></div>
+          <span>已完成</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background: linear-gradient(135deg, #f59e0b, #d97706);"></div>
+          <span>分流节点</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);"></div>
+          <span>汇合点</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 打印区域 -->
+    <div class="print-area">
+
+      <!-- 概览图 -->
+      <div class="card p-6 mb-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <span class="text-2xl">📊</span> 入驻流程概览
+        </h2>
+
+        <!-- 起点 -->
+        <div class="flex items-center justify-center mb-6">
+          <div class="bg-gray-100 rounded-full px-6 py-3 flex items-center gap-2">
+            <span class="text-2xl">📱</span>
+            <span class="font-semibold text-gray-700">用户进入 App / 小程序</span>
+          </div>
+        </div>
+
+        <!-- 分流箭头 -->
+        <div class="flex justify-center mb-4">
+          <svg width="60" height="40" viewBox="0 0 60 40">
+            <path d="M30 0 L30 25" stroke="#6b7280" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+            <text x="30" y="38" text-anchor="middle" font-size="12" fill="#6b7280">分流</text>
+            <defs>
+              <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/>
+              </marker>
+            </defs>
+          </svg>
+        </div>
+
+        <!-- 两条路径 -->
+        <div class="grid md:grid-cols-2 gap-6">
+          <!-- 个人账户 -->
+          <div class="border-2 border-blue-200 rounded-xl p-4 bg-blue-50">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="text-2xl">👤</span>
+                <span class="font-bold text-blue-700">个人账户入驻</span>
+              </div>
+              <span class="status-badge badge-progress">6 步流程</span>
+            </div>
+            <div class="flex items-center gap-1 flex-wrap">
+              <div class="step-card completed" style="min-width: 70px; padding: 10px 8px;">
+                <div class="step-number">✓</div>
+                <div class="step-title text-xs">登录</div>
+              </div>
+              <span class="text-gray-400">→</span>
+              <div class="step-card completed" style="min-width: 70px; padding: 10px 8px;">
+                <div class="step-number">✓</div>
+                <div class="step-title text-xs">填写资料</div>
+              </div>
+              <span class="text-gray-400">→</span>
+              <div class="step-card completed" style="min-width: 70px; padding: 10px 8px;">
+                <div class="step-number">✓</div>
+                <div class="step-title text-xs">银盛审核</div>
+              </div>
+              <span class="text-gray-400">→</span>
+              <div class="step-card completed" style="min-width: 70px; padding: 10px 8px;">
+                <div class="step-number">✓</div>
+                <div class="step-title text-xs">签约</div>
+              </div>
+              <span class="text-gray-400">→</span>
+              <div class="step-card completed" style="min-width: 70px; padding: 10px 8px;">
+                <div class="step-number">✓</div>
+                <div class="step-title text-xs">绑卡</div>
+              </div>
+              <span class="text-gray-400">→</span>
+              <div class="step-card current" style="min-width: 70px; padding: 10px 8px;">
+                <div class="step-number">6</div>
+                <div class="step-title text-xs">设密码</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 商户账户 -->
+          <div class="border-2 border-purple-200 rounded-xl p-4 bg-purple-50">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="text-2xl">🏢</span>
+                <span class="font-bold text-purple-700">商户账户入驻</span>
+              </div>
+              <span class="status-badge badge-pending">5 步流程</span>
+            </div>
+            <div class="flex items-center gap-1 flex-wrap">
+              <div class="step-card completed" style="min-width: 70px; padding: 10px 8px;">
+                <div class="step-number">✓</div>
+                <div class="step-title text-xs">登录</div>
+              </div>
+              <span class="text-gray-400">→</span>
+              <div class="step-card completed" style="min-width: 70px; padding: 10px 8px;">
+                <div class="step-number">✓</div>
+                <div class="step-title text-xs">填写信息</div>
+              </div>
+              <span class="text-gray-400">→</span>
+              <div class="step-card completed" style="min-width: 70px; padding: 10px 8px;">
+                <div class="step-number">✓</div>
+                <div class="step-title text-xs">银盛审核</div>
+              </div>
+              <span class="text-gray-400">→</span>
+              <div class="step-card completed" style="min-width: 70px; padding: 10px 8px;">
+                <div class="step-number">✓</div>
+                <div class="step-title text-xs">签约</div>
+              </div>
+              <span class="text-gray-400">→</span>
+              <div class="step-card current" style="min-width: 70px; padding: 10px 8px;">
+                <div class="step-number">4</div>
+                <div class="step-title text-xs">微信认证</div>
+              </div>
+              <span class="text-gray-400">→</span>
+              <div class="step-card pending" style="min-width: 70px; padding: 10px 8px;">
+                <div class="step-number">5</div>
+                <div class="step-title text-xs">支付宝认证</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 汇合 -->
+        <div class="flex justify-center mt-6">
+          <svg width="60" height="40" viewBox="0 0 60 40">
+            <path d="M0 10 L60 10" stroke="#6b7280" stroke-width="2" fill="none"/>
+            <path d="M30 10 L30 30" stroke="#6b7280" stroke-width="2" fill="none" marker-end="url(#arrowhead2)"/>
+            <text x="30" y="8" text-anchor="middle" font-size="12" fill="#6b7280">汇合</text>
+            <defs>
+              <marker id="arrowhead2" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/>
+              </marker>
+            </defs>
+          </svg>
+        </div>
+
+        <div class="flex justify-center">
+          <div class="merge-point">
+            <span>✅<br>完成</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 详细流程对比 -->
+      <div class="card p-6 mb-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <span class="text-2xl">🔍</span> 步骤详细对比
+        </h2>
+
+        <div class="overflow-x-auto">
+          <table class="table-simple">
+            <thead>
+              <tr>
+                <th class="w-16">步骤</th>
+                <th class="w-28">流程类型</th>
+                <th>操作内容</th>
+                <th>涉及资料</th>
+                <th class="w-24">完成方式</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td rowspan="2" class="font-bold text-center bg-blue-50">1</td>
+                <td rowspan="2" class="text-blue-600 font-medium">通用</td>
+                <td rowspan="2">短信验证码登录</td>
+                <td rowspan="2">手机号</td>
+                <td>自操作</td>
+              </tr>
+              <tr>
+                <td>代操作</td>
+              </tr>
+
+              <tr>
+                <td class="font-bold text-center bg-blue-50">2</td>
+                <td class="text-purple-600 font-medium">个人</td>
+                <td>填写个人资料</td>
+                <td>姓名、身份证号、身份证照片、银行卡、预留手机号</td>
+                <td>自操作 / 代操作</td>
+              </tr>
+              <tr>
+                <td class="font-bold text-center bg-purple-50">2</td>
+                <td class="text-purple-600 font-medium">商户</td>
+                <td>填写商户信息</td>
+                <td>营业执照、法人身份证、对公账户、联系人信息</td>
+                <td>自操作 / 代操作</td>
+              </tr>
+
+              <tr>
+                <td rowspan="2" class="font-bold text-center bg-blue-50">3</td>
+                <td rowspan="2" class="text-yellow-600 font-medium">通用</td>
+                <td rowspan="2">银盛审核</td>
+                <td rowspan="2">提交的资料</td>
+                <td>后台审核</td>
+              </tr>
+              <tr>
+                <td>不可代操作</td>
+              </tr>
+
+              <tr>
+                <td rowspan="2" class="font-bold text-center bg-blue-50">4</td>
+                <td class="text-purple-600 font-medium">个人</td>
+                <td>签约确认（电子签名）</td>
+                <td>签名图片</td>
+                <td>自操作 / 代操作</td>
+              </tr>
+              <tr>
+                <td class="text-purple-600 font-medium">商户</td>
+                <td>签约确认（电子签名）</td>
+                <td>签名图片</td>
+                <td>自操作 / 代操作</td>
+              </tr>
+
+              <tr>
+                <td class="font-bold text-center bg-green-50">5</td>
+                <td class="text-purple-600 font-medium">个人</td>
+                <td>绑定银行卡</td>
+                <td>银行卡号</td>
+                <td>自操作 / 代操作</td>
+              </tr>
+              <tr>
+                <td class="font-bold text-center bg-blue-50">5</td>
+                <td class="text-purple-600 font-medium">商户</td>
+                <td>微信认证（扫码）</td>
+                <td>微信主体认证</td>
+                <td>自操作 / 代操作</td>
+              </tr>
+
+              <tr>
+                <td class="font-bold text-center bg-purple-50">6</td>
+                <td class="text-green-600 font-medium">个人</td>
+                <td>安全设置（设置支付密码）</td>
+                <td>6位数字密码</td>
+                <td>自操作 / 代操作</td>
+              </tr>
+              <tr>
+                <td class="font-bold text-center bg-purple-50">6</td>
+                <td class="text-purple-600 font-medium">商户</td>
+                <td>支付宝认证（扫码）</td>
+                <td>支付宝商家认证</td>
+                <td>自操作 / 代操作</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 状态流转图 -->
+      <div class="card p-6 mb-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <span class="text-2xl">🔄</span> 状态流转图
+        </h2>
+
+        <div class="flex flex-wrap items-center justify-center gap-4 mb-6">
+          <div class="status-badge badge-progress">
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+            进行中 IN_PROGRESS
+          </div>
+          <span class="text-gray-400">→</span>
+          <div class="status-badge badge-pending">
+            <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+            待审核 PENDING_AUDIT
+          </div>
+          <span class="text-gray-400">→</span>
+          <div class="status-badge badge-rejected">
+            <span class="w-2 h-2 rounded-full bg-red-500"></span>
+            审核失败/拒绝 FAILED/REJECTED
+          </div>
+          <span class="text-gray-400">↩</span>
+          <div class="status-badge badge-progress">
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+            可重新提交
+          </div>
+          <span class="text-gray-400">→</span>
+          <div class="status-badge badge-complete">
+            <span class="w-2 h-2 rounded-full bg-green-500"></span>
+            已完成 COMPLETED
+          </div>
+        </div>
+
+        <div class="highlight-box">
+          <div class="flex items-start gap-3">
+            <span class="text-2xl">💡</span>
+            <div>
+              <div class="font-semibold text-gray-800 mb-1">状态说明</div>
+              <ul class="text-sm text-gray-600 space-y-1">
+                <li>• <strong>进行中</strong>：入驻流程未完成，客户仍在操作中</li>
+                <li>• <strong>待审核</strong>：资料已提交，等待银盛审核</li>
+                <li>• <strong>审核失败</strong>：资料有问题，可重新提交修正</li>
+                <li>• <strong>审核拒绝</strong>：严重问题，需重新发入驻申请</li>
+                <li>• <strong>已完成</strong>：所有步骤完成，入驻成功</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 后台管理流程 -->
+      <div class="card p-6 mb-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <span class="text-2xl">⚙️</span> 后台管理流程
+        </h2>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <!-- 继续入驻邀请 -->
+          <div>
+            <h3 class="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+              <span class="text-lg">📩</span> 继续入驻邀请流程
+            </h3>
+            <div class="space-y-2">
+              <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                <span class="w-6 h-6 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center font-bold">1</span>
+                <span class="text-sm">运营在后台查看商户入驻进度</span>
+              </div>
+              <div class="flex justify-center"><span class="text-gray-400">↓</span></div>
+              <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                <span class="w-6 h-6 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center font-bold">2</span>
+                <span class="text-sm">发现中断，点击"继续入驻邀请"</span>
+              </div>
+              <div class="flex justify-center"><span class="text-gray-400">↓</span></div>
+              <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                <span class="w-6 h-6 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center font-bold">3</span>
+                <span class="text-sm">设置"从第几步继续" + 链接有效期</span>
+              </div>
+              <div class="flex justify-center"><span class="text-gray-400">↓</span></div>
+              <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                <span class="w-6 h-6 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center font-bold">4</span>
+                <span class="text-sm">选择发送方式：短信 / 复制链接 / 微信</span>
+              </div>
+              <div class="flex justify-center"><span class="text-gray-400">↓</span></div>
+              <div class="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
+                <span class="w-6 h-6 rounded-full bg-green-500 text-white text-xs flex items-center justify-center font-bold">✓</span>
+                <span class="text-sm text-green-700">客户收到链接，完成剩余步骤</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 代入驻操作 -->
+          <div>
+            <h3 class="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+              <span class="text-lg">👨‍💼</span> 代入驻操作流程
+            </h3>
+            <div class="space-y-2">
+              <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                <span class="w-6 h-6 rounded-full bg-purple-500 text-white text-xs flex items-center justify-center font-bold">1</span>
+                <span class="text-sm">客户因操作困难联系客服</span>
+              </div>
+              <div class="flex justify-center"><span class="text-gray-400">↓</span></div>
+              <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                <span class="w-6 h-6 rounded-full bg-purple-500 text-white text-xs flex items-center justify-center font-bold">2</span>
+                <span class="text-sm">客服确认身份，获取相关材料</span>
+              </div>
+              <div class="flex justify-center"><span class="text-gray-400">↓</span></div>
+              <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                <span class="w-6 h-6 rounded-full bg-purple-500 text-white text-xs flex items-center justify-center font-bold">3</span>
+                <span class="text-sm">运营人员在后台代为操作对应步骤</span>
+              </div>
+              <div class="flex justify-center"><span class="text-gray-400">↓</span></div>
+              <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                <span class="w-6 h-6 rounded-full bg-purple-500 text-white text-xs flex items-center justify-center font-bold">4</span>
+                <span class="text-sm">记录代操作日志（操作人、时间、数据）</span>
+              </div>
+              <div class="flex justify-center"><span class="text-gray-400">↓</span></div>
+              <div class="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
+                <span class="w-6 h-6 rounded-full bg-green-500 text-white text-xs flex items-center justify-center font-bold">✓</span>
+                <span class="text-sm text-green-700">入驻流程继续推进</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 数据流程 -->
+      <div class="card p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <span class="text-2xl">📋</span> 数据流转概览
+        </h2>
+
+        <div class="flex flex-wrap justify-center gap-6">
+          <div class="text-center p-4 bg-blue-50 rounded-xl min-w-32">
+            <div class="text-3xl mb-2">👤</div>
+            <div class="font-semibold text-blue-700">客户</div>
+            <div class="text-xs text-gray-500 mt-1">提交入驻申请</div>
+          </div>
+
+          <div class="flex items-center text-gray-400">
+            <span class="text-2xl">→</span>
+          </div>
+
+          <div class="text-center p-4 bg-green-50 rounded-xl min-w-32">
+            <div class="text-3xl mb-2">💻</div>
+            <div class="font-semibold text-green-700">前端系统</div>
+            <div class="text-xs text-gray-500 mt-1">表单数据收集</div>
+          </div>
+
+          <div class="flex items-center text-gray-400">
+            <span class="text-2xl">→</span>
+          </div>
+
+          <div class="text-center p-4 bg-purple-50 rounded-xl min-w-32">
+            <div class="text-3xl mb-2">🔗</div>
+            <div class="font-semibold text-purple-700">后端 API</div>
+            <div class="text-xs text-gray-500 mt-1">数据存储、状态管理</div>
+          </div>
+
+          <div class="flex items-center text-gray-400">
+            <span class="text-2xl">→</span>
+          </div>
+
+          <div class="text-center p-4 bg-yellow-50 rounded-xl min-w-32">
+            <div class="text-3xl mb-2">📊</div>
+            <div class="font-semibold text-yellow-700">后台管理</div>
+            <div class="text-xs text-gray-500 mt-1">审核、代操作、邀请</div>
+          </div>
+
+          <div class="flex items-center text-gray-400">
+            <span class="text-2xl">→</span>
+          </div>
+
+          <div class="text-center p-4 bg-red-50 rounded-xl min-w-32">
+            <div class="text-3xl mb-2">🏦</div>
+            <div class="font-semibold text-red-700">银盛审核</div>
+            <div class="text-xs text-gray-500 mt-1">人工/自动审核</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="text-center mt-6 no-print">
+      <button onclick="window.print()" class="bg-white text-gray-700 px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all mr-4">
+        🖨️ 打印流程图
+      </button>
+      <button onclick="window.close()" class="bg-white bg-opacity-20 text-white px-6 py-3 rounded-full shadow-lg hover:bg-opacity-30 transition-all">
+        ✕ 关闭
+      </button>
+    </div>
+
+    <!-- Footer -->
+    <div class="text-center mt-6 text-white text-opacity-60 text-sm">
+      银盛钱包 · 商户入驻后台管理系统 · 业务流程图 · V1.2
+    </div>
+
+  </div>
+</body>
+</html>

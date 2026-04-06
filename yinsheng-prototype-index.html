@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>银盛钱包 · 注册入驻流程原型</title>
+  <style>
+    :root{
+      --primary:#165DFF;--primary-light:#4080FF;--primary-bg:#EEF3FF;--primary-pale:#D6E4FF;
+      --success:#00B42A;--success-bg:#E8FFEA;
+      --warning:#FF7D00;--warning-bg:#FFF3E8;
+      --error:#F53F3F;--error-bg:#FFECE8;
+      --text-1:#1D2129;--text-2:#4E5969;--text-3:#86909C;--text-dis:#C9CDD4;
+      --border:#E5E6EB;--bg:#F2F3F5;--card:#FFFFFF;
+      --r-sm:6px;--r-md:10px;--r-lg:16px;--r-xl:24px;--r-full:9999px;
+      --shadow-card:0 4px 20px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.04);
+      --tr:200ms cubic-bezier(0.4,0,0.2,1);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;
+      background:linear-gradient(160deg,#EEF3FF 0%,#F2F3F5 60%,#FFFFFF 100%);
+      min-height:100vh;-webkit-font-smoothing:antialiased;padding:0 0 48px;}
+
+    /* 顶部 Hero */
+    .hero{background:linear-gradient(135deg,#165DFF 0%,#4080FF 60%,#5BA4FF 100%);
+      padding:40px 24px 60px;position:relative;overflow:hidden;text-align:center;}
+    .hero::before{content:'';position:absolute;top:-60px;right:-40px;width:240px;height:240px;
+      border-radius:50%;background:rgba(255,255,255,.08);}
+    .hero::after{content:'';position:absolute;bottom:-80px;left:-60px;width:280px;height:280px;
+      border-radius:50%;background:rgba(255,255,255,.06);}
+    .hero-logo{width:64px;height:64px;border-radius:20px;
+      background:rgba(255,255,255,.2);backdrop-filter:blur(8px);
+      display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
+      position:relative;z-index:1;}
+    .hero-title{font-size:26px;font-weight:800;color:#fff;margin-bottom:8px;
+      position:relative;z-index:1;letter-spacing:.5px;}
+    .hero-sub{font-size:14px;color:rgba(255,255,255,.75);line-height:1.6;
+      position:relative;z-index:1;}
+    .hero-tag{display:inline-flex;align-items:center;gap:6px;margin-top:12px;
+      background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
+      border-radius:var(--r-full);padding:5px 14px;font-size:12px;color:rgba(255,255,255,.85);
+      position:relative;z-index:1;}
+    .hero-dot{width:6px;height:6px;border-radius:50%;background:#7AFF9A;animation:blink 1.2s infinite;}
+    @keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+    /* 流程总览箭头图 */
+    .flow-overview{background:#fff;margin:0 16px;margin-top:-28px;border-radius:var(--r-lg);
+      box-shadow:var(--shadow-card);border:1px solid rgba(229,230,235,.6);
+      padding:20px 16px;position:relative;z-index:10;}
+    .flow-title{font-size:14px;font-weight:600;color:var(--text-2);margin-bottom:16px;
+      display:flex;align-items:center;gap:6px;}
+    .flow-steps{display:flex;align-items:center;overflow-x:auto;gap:0;padding-bottom:4px;}
+    .flow-steps::-webkit-scrollbar{height:3px;}
+    .flow-steps::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+    .flow-step{display:flex;flex-direction:column;align-items:center;gap:6px;
+      flex-shrink:0;min-width:64px;cursor:pointer;}
+    .flow-step-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;
+      justify-content:center;font-size:14px;font-weight:700;transition:all var(--tr);}
+    .flow-step:hover .flow-step-dot{transform:scale(1.08);}
+    .flow-step-label{font-size:11px;color:var(--text-3);text-align:center;line-height:1.3;
+      max-width:60px;}
+    .flow-arrow{font-size:16px;color:var(--text-dis);flex-shrink:0;padding:0 2px;margin-top:-16px;}
+
+    /* 分区标题 */
+    .section-title{font-size:16px;font-weight:700;color:var(--text-1);
+      padding:24px 20px 12px;display:flex;align-items:center;gap:8px;}
+    .section-badge{background:var(--primary-bg);color:var(--primary);
+      font-size:11px;padding:2px 8px;border-radius:var(--r-full);font-weight:600;}
+
+    /* 页面卡片列表 */
+    .page-list{display:flex;flex-direction:column;gap:12px;padding:0 16px;}
+    .page-card{background:#fff;border-radius:var(--r-lg);box-shadow:var(--shadow-card);
+      border:1px solid rgba(229,230,235,.6);overflow:hidden;cursor:pointer;
+      transition:all var(--tr);text-decoration:none;display:block;}
+    .page-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,0.12);}
+    .page-card-inner{display:flex;align-items:stretch;}
+    /* 左侧彩条 */
+    .page-card-stripe{width:5px;flex-shrink:0;}
+    .page-card-content{flex:1;padding:16px 16px 16px 14px;}
+    .page-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;}
+    .page-card-left{display:flex;align-items:center;gap:10px;}
+    .page-card-icon{width:40px;height:40px;border-radius:var(--r-md);
+      display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+    .page-card-name{font-size:15px;font-weight:700;color:var(--text-1);margin-bottom:2px;}
+    .page-card-step{font-size:11px;color:var(--text-3);}
+    .page-card-badge{font-size:11px;padding:3px 9px;border-radius:var(--r-full);
+      font-weight:600;white-space:nowrap;flex-shrink:0;}
+    .page-card-desc{font-size:13px;color:var(--text-2);line-height:1.5;margin-bottom:10px;}
+    .page-card-features{display:flex;flex-wrap:wrap;gap:6px;}
+    .feature-tag{font-size:11px;color:var(--text-3);background:var(--bg);
+      padding:2px 8px;border-radius:var(--r-full);}
+    .page-card-arrow{position:absolute;right:16px;top:50%;transform:translateY(-50%);
+      color:var(--text-dis);}
+
+    /* 说明卡 */
+    .note-card{background:#fff;border-radius:var(--r-lg);box-shadow:var(--shadow-card);
+      border:1px solid rgba(229,230,235,.6);margin:12px 16px 0;padding:16px 20px;}
+    .note-title{font-size:14px;font-weight:600;color:var(--text-1);margin-bottom:10px;
+      display:flex;align-items:center;gap:6px;}
+    .note-item{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;font-size:13px;color:var(--text-2);line-height:1.5;}
+    .note-item:last-child{margin-bottom:0;}
+    .note-num{width:18px;height:18px;border-radius:50%;background:var(--primary);
+      color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;
+      justify-content:center;flex-shrink:0;margin-top:1px;}
+
+    /* 底部 */
+    .footer{text-align:center;padding:32px 20px 0;font-size:12px;color:var(--text-dis);line-height:1.8;}
+  </style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-logo">
+    <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
+      <rect x="4" y="12" width="30" height="20" rx="4" fill="white" fill-opacity="0.3" stroke="white" stroke-width="2"/>
+      <path d="M4 17h30" stroke="white" stroke-width="2"/>
+      <rect x="24" y="21" width="8" height="6" rx="2" fill="white"/>
+      <circle cx="27" cy="24" r="1.2" fill="#165DFF"/>
+    </svg>
+  </div>
+  <div class="hero-title">银盛钱包 · 注册入驻</div>
+  <div class="hero-sub">完整用户注册与钱包入驻流程<br/>UI 交互原型设计稿</div>
+  <div class="hero-tag">
+    <span class="hero-dot"></span>
+    12 个页面原型 · 个人6步 / 商户5步 · 可交互演示
+  </div>
+</div>
+
+<!-- 流程总览 -->
+<div class="flow-overview">
+  <div class="flow-title">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <path d="M2 7h10M8 3l4 4-4 4" stroke="#4E5969" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    完整流程路径
+  </div>
+
+  <!-- 个人入驻流程 -->
+  <div style="font-size:12px;color:#86909C;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+    <span style="font-weight:600;color:#4E5969;">👤 个人账户</span>
+    <span>6步流程</span>
+  </div>
+  <div class="flow-steps" style="margin-bottom:16px;">
+    <div class="flow-step" onclick="location.href='yinsheng-wallet-login.html'">
+      <div class="flow-step-dot" style="background:#EEF3FF;">📱</div>
+      <div class="flow-step-label">短信登录</div>
+    </div>
+    <div class="flow-arrow">›</div>
+    <div class="flow-step" onclick="location.href='yinsheng-onboarding-apply.html'">
+      <div class="flow-step-dot" style="background:#FFF3E8;">📋</div>
+      <div class="flow-step-label">填写资料</div>
+    </div>
+    <div class="flow-arrow">›</div>
+    <div class="flow-step" onclick="location.href='yinsheng-signing-processing.html'">
+      <div class="flow-step-dot" style="background:#EEF3FF;">🔍</div>
+      <div class="flow-step-label">银盛审核</div>
+    </div>
+    <div class="flow-arrow">›</div>
+    <div class="flow-step" onclick="location.href='yinsheng-signing-confirm.html'">
+      <div class="flow-step-dot" style="background:#FFF7E8;">✍️</div>
+      <div class="flow-step-label">签约确认</div>
+    </div>
+    <div class="flow-arrow">›</div>
+    <div class="flow-step" onclick="location.href='yinsheng-bind-bank.html'">
+      <div class="flow-step-dot" style="background:#E8FFEA;">🏦</div>
+      <div class="flow-step-label">绑定银行卡</div>
+    </div>
+    <div class="flow-arrow">›</div>
+    <div class="flow-step" onclick="location.href='yinsheng-security-setup.html'">
+      <div class="flow-step-dot" style="background:#EEF3FF;">🔐</div>
+      <div class="flow-step-label">设置密码</div>
+    </div>
+    <div class="flow-arrow">›</div>
+    <div class="flow-step" onclick="location.href='yinsheng-onboarding-success.html'">
+      <div class="flow-step-dot" style="background:#E8FFEA;">🎉</div>
+      <div class="flow-step-label">申请成功</div>
+    </div>
+  </div>
+
+  <!-- 商户入驻流程 -->
+  <div style="font-size:12px;color:#86909C;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+    <span style="font-weight:600;color:#4E5969;">🏢 商户账户</span>
+    <span>5步流程</span>
+  </div>
+  <div class="flow-steps">
+    <div class="flow-step" onclick="location.href='yinsheng-account-type.html'">
+      <div class="flow-step-dot" style="background:#FFF3E8;">🏢</div>
+      <div class="flow-step-label">选择类型</div>
+    </div>
+    <div class="flow-arrow">›</div>
+    <div class="flow-step" onclick="location.href='yinsheng-merchant-apply.html'">
+      <div class="flow-step-dot" style="background:#FFF7E8;">📄</div>
+      <div class="flow-step-label">填写信息</div>
+    </div>
+    <div class="flow-arrow">›</div>
+    <div class="flow-step" onclick="location.href='yinsheng-signing-processing.html'">
+      <div class="flow-step-dot" style="background:#EEF3FF;">🔍</div>
+      <div class="flow-step-label">银盛审核</div>
+    </div>
+    <div class="flow-arrow">›</div>
+    <div class="flow-step" onclick="location.href='yinsheng-signing-confirm.html'">
+      <div class="flow-step-dot" style="background:#FFF7E8;">✍️</div>
+      <div class="flow-step-label">签约</div>
+    </div>
+    <div class="flow-arrow">›</div>
+    <div class="flow-step" onclick="location.href='yinsheng-merchant-wechat.html'">
+      <div class="flow-step-dot" style="background:#E8FFEA;">💚</div>
+      <div class="flow-step-label">微信认证</div>
+    </div>
+    <div class="flow-arrow">›</div>
+    <div class="flow-step" onclick="location.href='yinsheng-merchant-alipay.html'">
+      <div class="flow-step-dot" style="background:#EEF3FF;">💙</div>
+      <div class="flow-step-label">支付宝认证</div>
+    </div>
+  </div>
+</div>
+
+<!-- 页面列表 -->
+<div class="section-title">
+  全部页面
+  <span class="section-badge">12 个</span>
+</div>
+
+<!-- 商户入驻 - 新增 -->
+<div style="background:#FFF7E8;border:1px dashed #FF7D00;border-radius:12px;margin:0 16px 16px;padding:14px 16px;display:flex;align-items:center;gap:10px;">
+  <div style="font-size:24px;">🏢</div>
+  <div style="flex:1;">
+    <div style="font-size:14px;font-weight:600;color:#1D2129;margin-bottom:2px;">商户入驻流程</div>
+    <div style="font-size:12px;color:#4E5969;">登录后选择「商户账户」进入，专属5步认证流程</div>
+  </div>
+  <div style="font-size:11px;background:#FF7D00;color:#fff;padding:4px 10px;border-radius:999px;font-weight:600;">新增</div>
+</div>
+
+<div class="page-list">
+
+  <!-- P1 登录 -->
+  <a class="page-card" href="yinsheng-wallet-login.html">
+    <div class="page-card-inner">
+      <div class="page-card-stripe" style="background:#165DFF;"></div>
+      <div class="page-card-content">
+        <div class="page-card-top">
+          <div class="page-card-left">
+            <div class="page-card-icon" style="background:#EEF3FF;">📱</div>
+            <div>
+              <div class="page-card-name">短信验证码登录</div>
+              <div class="page-card-step">入口页面</div>
+            </div>
+          </div>
+          <span class="page-card-badge" style="background:#EEF3FF;color:#165DFF;">已完成</span>
+        </div>
+        <div class="page-card-desc">手机号 + 短信验证码登录，未注册自动创建账户。国家码选择、60秒倒计时、协议联动。</div>
+        <div class="page-card-features">
+          <span class="feature-tag">手机号校验</span>
+          <span class="feature-tag">SMS倒计时</span>
+          <span class="feature-tag">协议勾选</span>
+          <span class="feature-tag">Loading动画</span>
+          <span class="feature-tag">演示码123456</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- P2 入驻申请 -->
+  <a class="page-card" href="yinsheng-onboarding-apply.html">
+    <div class="page-card-inner">
+      <div class="page-card-stripe" style="background:#FF7D00;"></div>
+      <div class="page-card-content">
+        <div class="page-card-top">
+          <div class="page-card-left">
+            <div class="page-card-icon" style="background:#FFF3E8;">📋</div>
+            <div>
+              <div class="page-card-name">钱包入驻申请</div>
+              <div class="page-card-step">步骤 1/6</div>
+            </div>
+          </div>
+          <span class="page-card-badge" style="background:#FFF3E8;color:#FF7D00;">已完成</span>
+        </div>
+        <div class="page-card-desc">上传身份证正反面，填写姓名、身份证号、银行卡号，提交入驻申请。</div>
+        <div class="page-card-features">
+          <span class="feature-tag">身份证上传</span>
+          <span class="feature-tag">实名信息填写</span>
+          <span class="feature-tag">银行卡号</span>
+          <span class="feature-tag">6步骤进度条</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- P3 审核等待 -->
+  <a class="page-card" href="yinsheng-signing-processing.html">
+    <div class="page-card-inner">
+      <div class="page-card-stripe" style="background:#165DFF;"></div>
+      <div class="page-card-content">
+        <div class="page-card-top">
+          <div class="page-card-left">
+            <div class="page-card-icon" style="background:#EEF3FF;">🔍</div>
+            <div>
+              <div class="page-card-name">银盛审核等待</div>
+              <div class="page-card-step">步骤 2/6</div>
+            </div>
+          </div>
+          <span class="page-card-badge" style="background:#EEF3FF;color:#165DFF;">已完成</span>
+        </div>
+        <div class="page-card-desc">盾牌动画 + 实时等待计时，手动刷新状态。审核通过直接跳转签约确认页。</div>
+        <div class="page-card-features">
+          <span class="feature-tag">盾牌旋转动画</span>
+          <span class="feature-tag">实时计时</span>
+          <span class="feature-tag">手动刷新</span>
+          <span class="feature-tag">通过直接跳转</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- P3-1 审核失败（有按钮） -->
+  <a class="page-card" href="yinsheng-audit-failed.html">
+    <div class="page-card-inner">
+      <div class="page-card-stripe" style="background:#F53F3F;"></div>
+      <div class="page-card-content">
+        <div class="page-card-top">
+          <div class="page-card-left">
+            <div class="page-card-icon" style="background:#FFECE8;">❌</div>
+            <div>
+              <div class="page-card-name">审核失败（有按钮）</div>
+              <div class="page-card-step">分支页面</div>
+            </div>
+          </div>
+          <span class="page-card-badge" style="background:#FFECE8;color:#F53F3F;">已完成</span>
+        </div>
+        <div class="page-card-desc">审核失败状态页面，红色主题设计，显示拒审原因纯文本、审核信息，带重新提交资料按钮。</div>
+        <div class="page-card-features">
+          <span class="feature-tag">红色主题</span>
+          <span class="feature-tag">失败图标动画</span>
+          <span class="feature-tag">拒审原因</span>
+          <span class="feature-tag">重新提交按钮</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- P3-2 审核不通过（无按钮） -->
+  <a class="page-card" href="yinsheng-audit-rejected.html">
+    <div class="page-card-inner">
+      <div class="page-card-stripe" style="background:#F53F3F;"></div>
+      <div class="page-card-content">
+        <div class="page-card-top">
+          <div class="page-card-left">
+            <div class="page-card-icon" style="background:#FFECE8;">🚫</div>
+            <div>
+              <div class="page-card-name">审核不通过（无按钮）</div>
+              <div class="page-card-step">分支页面</div>
+            </div>
+          </div>
+          <span class="page-card-badge" style="background:#FFECE8;color:#F53F3F;">已完成</span>
+        </div>
+        <div class="page-card-desc">审核不通过状态页面，红色主题设计，显示拒审原因纯文本、审核信息，无按钮操作纯展示。</div>
+        <div class="page-card-features">
+          <span class="feature-tag">红色主题</span>
+          <span class="feature-tag">失败图标动画</span>
+          <span class="feature-tag">拒审原因</span>
+          <span class="feature-tag">无按钮纯展示</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- P4 签约确认 -->
+  <a class="page-card" href="yinsheng-signing-confirm.html">
+    <div class="page-card-inner">
+      <div class="page-card-stripe" style="background:#FF7D00;"></div>
+      <div class="page-card-content">
+        <div class="page-card-top">
+          <div class="page-card-left">
+            <div class="page-card-icon" style="background:#FFF7E8;">✍️</div>
+            <div>
+              <div class="page-card-name">签约确认</div>
+              <div class="page-card-step">步骤 3/5</div>
+            </div>
+          </div>
+          <span class="page-card-badge" style="background:#FFF3E8;color:#FF7D00;">已完成</span>
+        </div>
+        <div class="page-card-desc">可展开阅读服务协议合同，手写签名画板（支持多色笔），双重确认后提交签约。</div>
+        <div class="page-card-features">
+          <span class="feature-tag">合同阅读进度</span>
+          <span class="feature-tag">手写签名画板</span>
+          <span class="feature-tag">多色画笔</span>
+          <span class="feature-tag">双确认勾选</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- P5 绑定银行卡 -->
+  <a class="page-card" href="yinsheng-bind-bank.html">
+    <div class="page-card-inner">
+      <div class="page-card-stripe" style="background:#00B42A;"></div>
+      <div class="page-card-content">
+        <div class="page-card-top">
+          <div class="page-card-left">
+            <div class="page-card-icon" style="background:#E8FFEA;">🏦</div>
+            <div>
+              <div class="page-card-name">绑定结算银行卡</div>
+              <div class="page-card-step">步骤 4/6</div>
+            </div>
+          </div>
+          <span class="page-card-badge" style="background:#E8FFEA;color:#00B42A;">已完成</span>
+        </div>
+        <div class="page-card-desc">实时银行卡号识别（工行/建行/农行等），3D银行卡预览，预留手机短信验证绑定。</div>
+        <div class="page-card-features">
+          <span class="feature-tag">银行实时识别</span>
+          <span class="feature-tag">3D卡片预览</span>
+          <span class="feature-tag">SMS验证</span>
+          <span class="feature-tag">演示码123456</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- P6 安全设置（合并页面） -->
+  <a class="page-card" href="yinsheng-security-setup.html">
+    <div class="page-card-inner">
+      <div class="page-card-stripe" style="background:#165DFF;"></div>
+      <div class="page-card-content">
+        <div class="page-card-top">
+          <div class="page-card-left">
+            <div class="page-card-icon" style="background:#EEF3FF;">🔐</div>
+            <div>
+              <div class="page-card-name">安全设置</div>
+              <div class="page-card-step">步骤 5/6 · 合并页</div>
+            </div>
+          </div>
+          <span class="page-card-badge" style="background:#EEF3FF;color:#165DFF;">已完成</span>
+        </div>
+        <div class="page-card-desc">合并验证手机号+设置支付密码为一步，必须先设置完支付密码才能获取验证码。</div>
+        <div class="page-card-features">
+          <span class="feature-tag">两步合一</span>
+          <span class="feature-tag">先设密码</span>
+          <span class="feature-tag">后验手机</span>
+          <span class="feature-tag">6位支付密码</span>
+          <span class="feature-tag">密码强度检测</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- P7 入驻成功 -->
+  <a class="page-card" href="yinsheng-onboarding-success.html">
+    <div class="page-card-inner">
+      <div class="page-card-stripe" style="background:#00B42A;"></div>
+      <div class="page-card-content">
+        <div class="page-card-top">
+          <div class="page-card-left">
+            <div class="page-card-icon" style="background:#E8FFEA;">🎉</div>
+            <div>
+              <div class="page-card-name">入驻成功</div>
+              <div class="page-card-step">步骤 6/6 · 终态</div>
+            </div>
+          </div>
+          <span class="page-card-badge" style="background:#E8FFEA;color:#00B42A;">已完成</span>
+        </div>
+        <div class="page-card-desc">彩带庆祝动画，展示账户信息、4个功能快捷入口，以及完整入驻时间线回顾。</div>
+        <div class="page-card-features">
+          <span class="feature-tag">彩带动画</span>
+          <span class="feature-tag">账户信息卡</span>
+          <span class="feature-tag">功能快捷入口</span>
+          <span class="feature-tag">入驻时间线</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- 商户 - 账户类型选择 -->
+  <a class="page-card" href="yinsheng-account-type.html">
+    <div class="page-card-inner">
+      <div class="page-card-stripe" style="background:#FF7D00;"></div>
+      <div class="page-card-content">
+        <div class="page-card-top">
+          <div class="page-card-left">
+            <div class="page-card-icon" style="background:#FFF7E8;">🏢</div>
+            <div>
+              <div class="page-card-name">账户类型选择</div>
+              <div class="page-card-step">商户入驻入口</div>
+            </div>
+          </div>
+          <span class="page-card-badge" style="background:#FFF7E8;color:#FF7D00;">新增</span>
+        </div>
+        <div class="page-card-desc">登录后选择入驻类型：个人账户（6步）或商户账户（5步），分流至不同入驻流程。</div>
+        <div class="page-card-features">
+          <span class="feature-tag">双卡片选择</span>
+          <span class="feature-tag">个人/商户分流</span>
+          <span class="feature-tag">视觉对比设计</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- 商户 - 填写信息 -->
+  <a class="page-card" href="yinsheng-merchant-apply.html">
+    <div class="page-card-inner">
+      <div class="page-card-stripe" style="background:#FF7D00;"></div>
+      <div class="page-card-content">
+        <div class="page-card-top">
+          <div class="page-card-left">
+            <div class="page-card-icon" style="background:#FFF7E8;">📄</div>
+            <div>
+              <div class="page-card-name">商户入驻 · 填写信息</div>
+              <div class="page-card-step">步骤 1/5</div>
+            </div>
+          </div>
+          <span class="page-card-badge" style="background:#FFF7E8;color:#FF7D00;">新增</span>
+        </div>
+        <div class="page-card-desc">营业执照、法人身份证、对公账户、联系人信息等完整采集，5步流程第一步。</div>
+        <div class="page-card-features">
+          <span class="feature-tag">营业执照上传</span>
+          <span class="feature-tag">法人身份证</span>
+          <span class="feature-tag">对公账户</span>
+          <span class="feature-tag">联系人信息</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- 商户 - 微信认证 -->
+  <a class="page-card" href="yinsheng-merchant-wechat.html">
+    <div class="page-card-inner">
+      <div class="page-card-stripe" style="background:#00C250;"></div>
+      <div class="page-card-content">
+        <div class="page-card-top">
+          <div class="page-card-left">
+            <div class="page-card-icon" style="background:#E8FFF0;">💚</div>
+            <div>
+              <div class="page-card-name">商户入驻 · 微信认证</div>
+              <div class="page-card-step">步骤 4/5</div>
+            </div>
+          </div>
+          <span class="page-card-badge" style="background:#E8FFF0;color:#00C250;">新增</span>
+        </div>
+        <div class="page-card-desc">扫码完成微信商户主体认证，二维码有效期5分钟，支持刷新，等待认证状态展示。</div>
+        <div class="page-card-features">
+          <span class="feature-tag">二维码扫码</span>
+          <span class="feature-tag">微信认证</span>
+          <span class="feature-tag">脉冲动画</span>
+          <span class="feature-tag">刷新二维码</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- 商户 - 支付宝认证 -->
+  <a class="page-card" href="yinsheng-merchant-alipay.html">
+    <div class="page-card-inner">
+      <div class="page-card-stripe" style="background:#1677FF;"></div>
+      <div class="page-card-content">
+        <div class="page-card-top">
+          <div class="page-card-left">
+            <div class="page-card-icon" style="background:#EEF3FF;">💙</div>
+            <div>
+              <div class="page-card-name">商户入驻 · 支付宝认证</div>
+              <div class="page-card-step">步骤 5/5 · 终态</div>
+            </div>
+          </div>
+          <span class="page-card-badge" style="background:#EEF3FF;color:#1677FF;">新增</span>
+        </div>
+        <div class="page-card-desc">扫码完成支付宝商家认证，二维码有效期5分钟，支持刷新，完成后跳转入驻成功页。</div>
+        <div class="page-card-features">
+          <span class="feature-tag">二维码扫码</span>
+          <span class="feature-tag">支付宝认证</span>
+          <span class="feature-tag">脉冲动画</span>
+          <span class="feature-tag">入驻成功</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+</div>
+
+<!-- 设计说明 -->
+<div class="note-card">
+  <div class="note-title">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="7" cy="7" r="6.5" stroke="#165DFF" stroke-width="1.2"/>
+      <path d="M7 6v5M7 4h.01" stroke="#165DFF" stroke-width="1.3" stroke-linecap="round"/>
+    </svg>
+    设计规格说明
+  </div>
+  <div class="note-item">
+    <div class="note-num">色</div>
+    主色 #165DFF，渐变 →#4080FF；辅色绿 #00B42A、橙 #FF7D00、红 #F53F3F；中性灰系列
+  </div>
+  <div class="note-item">
+    <div class="note-num">字</div>
+    PingFang SC / system-ui；标题 700w，正文 500/400w；基准 13-16px
+  </div>
+  <div class="note-item">
+    <div class="note-num">间</div>
+    4pt 基础栅格；卡片圆角 16px，按钮圆角 9999px（胶囊），输入框 10px
+  </div>
+  <div class="note-item">
+    <div class="note-num">阴</div>
+    卡片：0 4px 20px rgba(0,0,0,0.08)；按钮：0 4px 12px rgba(22,93,255,0.30)
+  </div>
+  <div class="note-item">
+    <div class="note-num">动</div>
+    过渡 200ms ease；Loading 旋转 700ms；脉冲 2.4s；彩带随机 2-5s
+  </div>
+</div>
+
+<div class="footer">
+  申请银盛收款账户 · UI 原型设计稿<br/>
+  银盛支付服务股份有限公司 © 2026
+</div>
+
+</body>
+</html>

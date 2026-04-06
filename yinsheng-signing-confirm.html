@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>申请银盛收款账户 · 签约确认</title>
+  <style>
+    :root {
+      --primary:#165DFF; --primary-light:#4080FF; --primary-bg:#EEF3FF; --primary-pale:#D6E4FF;
+      --success:#00B42A; --success-bg:#E8FFEA;
+      --error:#F53F3F;
+      --text-1:#1D2129; --text-2:#4E5969; --text-3:#86909C; --text-dis:#C9CDD4;
+      --border:#E5E6EB; --bg:#F2F3F5; --card:#FFFFFF;
+      --r-sm:6px; --r-md:10px; --r-lg:16px; --r-full:9999px;
+      --shadow-card:0 4px 20px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.04);
+      --tr:200ms cubic-bezier(0.4,0,0.2,1);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;
+      background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased;padding-bottom:110px;}
+
+    /* 步骤条 */
+    .step-bar{background:#fff;padding:20px 16px 16px;border-bottom:1px solid var(--border);}
+    .step-list{display:flex;align-items:flex-start;justify-content:space-between;position:relative;}
+    .step-list::before{content:'';position:absolute;top:14px;left:28px;right:28px;height:2px;background:#E5E6EB;z-index:0;}
+    .step-item{display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;z-index:1;flex:1;}
+    .step-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+      font-size:13px;font-weight:600;background:#E5E6EB;color:#86909C;transition:all var(--tr);}
+    .step-item.active .step-num{background:var(--primary);color:#fff;}
+    .step-item.done .step-num{background:var(--primary);color:#fff;}
+    .step-num svg{display:none;}
+    .step-item.done .step-num span{display:none;}
+    .step-item.done .step-num svg{display:block;}
+    .step-name{font-size:12px;color:#86909C;white-space:nowrap;}
+    .step-item.active .step-name{color:var(--primary);font-weight:500;}
+    .step-item.done .step-name{color:var(--text-1);}
+
+    .page-content{max-width:480px;margin:0 auto;padding:24px 16px 0;}
+
+    /* 指引卡片 */
+    .guide-card{background:#fff;border-radius:var(--r-lg);box-shadow:var(--shadow-card);
+      border:1px solid rgba(229,230,235,.6);padding:32px 24px;text-align:center;margin-bottom:20px;}
+    
+    /* 图标区 */
+    .guide-icon{width:80px;height:80px;margin:0 auto 20px;
+      background:linear-gradient(135deg,var(--primary-bg),#D6E4FF);
+      border-radius:50%;display:flex;align-items:center;justify-content:center;}
+    .guide-icon svg{width:40px;height:40px;}
+    
+    /* 标题 */
+    .guide-title{font-size:20px;font-weight:600;color:var(--text-1);margin-bottom:12px;}
+    
+    /* 说明文字 */
+    .guide-desc{font-size:14px;color:var(--text-2);line-height:1.8;margin-bottom:24px;}
+    .guide-desc p{margin-bottom:8px;}
+    .guide-desc p:last-child{margin-bottom:0;}
+    
+    /* 提示条 */
+    .guide-tip{background:var(--primary-bg);border:1px solid var(--primary-pale);
+      border-radius:var(--r-md);padding:14px 16px;display:flex;align-items:flex-start;gap:10px;
+      text-align:left;margin-bottom:24px;}
+    .guide-tip svg{flex-shrink:0;margin-top:2px;}
+    .guide-tip-text{font-size:13px;color:var(--text-2);line-height:1.6;}
+    .guide-tip-text strong{color:var(--primary);}
+
+    /* 前往签约按钮 */
+    .btn-primary{width:100%;height:52px;border:none;border-radius:var(--r-full);
+      background:linear-gradient(90deg,#165DFF,#4080FF);color:#fff;
+      font-size:16px;font-weight:600;letter-spacing:.5px;cursor:pointer;font-family:inherit;
+      box-shadow:0 4px 12px rgba(22,93,255,.30);transition:all var(--tr);
+      display:flex;align-items:center;justify-content:center;gap:8px;}
+    .btn-primary:hover{filter:brightness(1.05);}
+    .btn-primary:active{transform:scale(0.98);}
+    .btn-primary.loading{pointer-events:none;opacity:0.8;}
+    .btn-primary.loading::after{content:'';display:inline-block;width:16px;height:16px;
+      border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;
+      animation:spin .7s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* 底部安全提示 */
+    .security-footer{margin-top:28px;display:flex;align-items:center;justify-content:center;
+      gap:6px;font-size:12px;color:var(--text-3);}
+
+    /* Toast */
+    .toast{position:fixed;top:72px;left:50%;transform:translateX(-50%) translateY(-20px);
+      background:rgba(29,33,41,.88);color:#fff;font-size:14px;padding:10px 20px;
+      border-radius:var(--r-full);backdrop-filter:blur(8px);opacity:0;
+      transition:opacity .3s,transform .3s;pointer-events:none;white-space:nowrap;z-index:999;}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+    /* 模拟弹窗 */
+    .modal-overlay{position:fixed;inset:0;background:rgba(29,33,41,0.45);
+      backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;
+      z-index:200;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+    .modal-overlay.show{opacity:1;pointer-events:auto;}
+    .modal-content{background:#fff;border-radius:var(--r-lg);padding:28px 24px;
+      width:min(320px,calc(100vw - 48px));text-align:center;transform:scale(0.95);
+      transition:transform 0.3s;}
+    .modal-overlay.show .modal-content{transform:scale(1);}
+    .modal-icon{width:56px;height:56px;margin:0 auto 16px;
+      background:var(--success-bg);border-radius:50%;
+      display:flex;align-items:center;justify-content:center;}
+    .modal-title{font-size:17px;font-weight:600;color:var(--text-1);margin-bottom:8px;}
+    .modal-desc{font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:20px;}
+    .modal-btn{width:100%;height:44px;border:none;border-radius:var(--r-full);
+      background:var(--primary);color:#fff;font-size:15px;font-weight:500;cursor:pointer;}
+  </style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- 模拟弹窗 -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-content">
+    <div class="modal-icon">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+        <path d="M6 14l6 6 10-10" stroke="#00B42A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="modal-title">签约完成</div>
+    <div class="modal-desc">您已成功完成第三方签约<br/>即将进入下一步</div>
+    <button class="modal-btn" onclick="goNext()">确定</button>
+  </div>
+</div>
+
+<!-- 步骤条 -->
+<div class="step-bar">
+  <div class="step-list">
+    <div class="step-item done">
+      <div class="step-num"><span>1</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step-name">填写资料</div>
+    </div>
+    <div class="step-item done">
+      <div class="step-num"><span>2</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step-name">银盛审核</div>
+    </div>
+    <div class="step-item active">
+      <div class="step-num"><span>3</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step-name">签约确认</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num"><span>4</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step-name">绑定银行卡</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num"><span>5</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step-name">设置密码</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num"><span>6</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step-name">申请成功</div>
+    </div>
+  </div>
+</div>
+
+<div class="page-content">
+
+  <!-- 指引卡片 -->
+  <div class="guide-card">
+    <!-- 图标 -->
+    <div class="guide-icon">
+      <svg viewBox="0 0 40 40" fill="none">
+        <rect x="6" y="10" width="28" height="20" rx="3" fill="#165DFF" opacity="0.15"/>
+        <rect x="6" y="10" width="28" height="20" rx="3" stroke="#165DFF" stroke-width="2"/>
+        <path d="M6 16h28" stroke="#165DFF" stroke-width="1.5"/>
+        <circle cx="12" cy="23" r="2" fill="#165DFF"/>
+        <path d="M18 23h12" stroke="#165DFF" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M32 8l4-4M32 8l4 4" stroke="#165DFF" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    
+    <!-- 标题 -->
+    <div class="guide-title">签约确认</div>
+    
+    <!-- 说明 -->
+    <div class="guide-desc">
+      <p>您的入驻申请已通过银盛审核</p>
+      <p>请完成签约以继续开通钱包服务</p>
+    </div>
+    
+    <!-- 提示 -->
+    <div class="guide-tip">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M9 1.5L2.25 4.5v5.25C2.25 13.725 5.19 17.565 9 18.75c3.81-1.185 6.75-5.025 6.75-8.985V4.5L9 1.5z" fill="#EEF3FF" stroke="#165DFF" stroke-width="1.2" stroke-linejoin="round"/>
+        <path d="M9 5v5M9 12h.01" stroke="#165DFF" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <div class="guide-tip-text">
+        签约完成后将<strong>自动返回</strong>并进入下一步，无需手动操作
+      </div>
+    </div>
+    
+    <!-- 前往签约按钮 -->
+    <button class="btn-primary" id="btnSign" onclick="goToSign()">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M9 3v12M3 9h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      去签约
+    </button>
+  </div>
+
+  <!-- 底部安全提示 -->
+  <div class="security-footer">
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+      <path d="M6.5 1L2 3v3.5c0 2.76 1.93 5.34 4.5 6 2.57-.66 4.5-3.24 4.5-6V3L6.5 1z"
+        stroke="#C9CDD4" stroke-width="1.2" stroke-linejoin="round" fill="none"/>
+      <path d="M4.5 6.5l1.5 1.5 2.5-2.5" stroke="#C9CDD4" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    数据传输已加密 · 签约信息安全保障
+  </div>
+
+</div>
+
+<script>
+/* ---- Toast ---- */
+function showToast(msg,d=2200){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),d);
+}
+
+/* ---- 前往签约 ---- */
+function goToSign(){
+  const btn=document.getElementById('btnSign');
+  btn.classList.add('loading');
+  btn.innerHTML='正在跳转...';
+  
+  // 模拟跳转到第三方签约页面
+  setTimeout(()=>{
+    showToast('已打开第三方签约页面');
+    btn.classList.remove('loading');
+    btn.innerHTML=`<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 3v12M3 9h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>前往签约`;
+    
+    // 模拟签约完成后自动返回（演示用弹窗）
+    setTimeout(()=>{
+      document.getElementById('modalOverlay').classList.add('show');
+    },1500);
+  },1200);
+}
+
+/* ---- 进入下一步 ---- */
+function goNext(){
+  document.getElementById('modalOverlay').classList.remove('show');
+  showToast('正在进入下一步...');
+  setTimeout(()=>{
+    window.location.href='yinsheng-bind-bank.html';
+  },800);
+}
+</script>
+</body>
+</html>

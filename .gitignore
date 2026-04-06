@@ -1,0 +1,16 @@
+# 依赖
+node_modules/
+package-lock.json
+
+# 截图
+screenshots/
+
+# macOS
+.DS_Store
+
+# GitHub Pages 会用到的
+.nojekyll
+
+# IDE
+.vscode/
+.idea/

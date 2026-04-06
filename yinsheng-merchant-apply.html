@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>银盛钱包 · 商户入驻</title>
+  <style>
+    :root {
+      --primary:#165DFF; --primary-light:#4080FF; --primary-bg:#EEF3FF; --primary-pale:#D6E4FF;
+      --success:#00B42A; --success-bg:#E8FFEA;
+      --error:#F53F3F; --error-bg:#FFECE8;
+      --text-1:#1D2129; --text-2:#4E5969; --text-3:#86909C; --text-dis:#C9CDD4;
+      --border:#E5E6EB; --bg:#F2F3F5; --card:#FFFFFF;
+      --r-sm:6px; --r-md:10px; --r-lg:16px; --r-full:9999px;
+      --shadow-card:0 4px 20px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.04);
+      --tr:200ms cubic-bezier(0.4,0,0.2,1);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;
+      background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased;padding-bottom:140px;}
+
+    /* 顶部导航 */
+    .nav-bar{background:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;
+      border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+    .nav-back{display:flex;align-items:center;gap:4px;color:var(--text-2);font-size:15px;cursor:pointer;}
+    .nav-title{font-size:17px;font-weight:600;color:var(--text-1);}
+    .nav-step{font-size:14px;color:var(--primary);font-weight:500;}
+
+    /* 步骤条 */
+    .step-bar{background:#fff;padding:20px 16px 16px;border-bottom:1px solid var(--border);}
+    .step-list{display:flex;align-items:flex-start;justify-content:space-between;position:relative;}
+    .step-list::before{content:'';position:absolute;top:14px;left:20px;right:20px;height:2px;background:#E5E6EB;z-index:0;}
+    .step-item{display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;z-index:1;flex:1;}
+    .step-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+      font-size:13px;font-weight:600;background:#E5E6EB;color:#86909C;transition:all var(--tr);}
+    .step-item.active .step-num{background:var(--primary);color:#fff;}
+    .step-item.done .step-num{background:var(--success);color:#fff;}
+    .step-num svg{display:none;}
+    .step-item.done .step-num span{display:none;}
+    .step-item.done .step-num svg{display:block;}
+    .step-name{font-size:11px;color:#86909C;white-space:nowrap;}
+    .step-item.active .step-name{color:var(--primary);font-weight:500;}
+    .step-item.done .step-name{color:var(--success);}
+
+    /* 内容 */
+    .page-content{max-width:520px;margin:0 auto;padding:16px;}
+
+    /* 区块标题 */
+    .section-title{font-size:15px;font-weight:600;color:var(--text-1);margin-bottom:12px;
+      display:flex;align-items:center;gap:6px;}
+    .section-title::before{content:'';width:4px;height:16px;background:var(--primary);border-radius:2px;}
+
+    /* 上传区域 */
+    .upload-section{margin-bottom:20px;}
+    .upload-grid{display:grid;grid-template-columns:1fr;gap:12px;}
+    .upload-large{
+      border:1.5px dashed #C9CDD4;border-radius:var(--r-md);background:#FAFBFC;
+      cursor:pointer;transition:all var(--tr);aspect-ratio:16/9;
+      display:flex;align-items:center;justify-content:center;
+      position:relative;overflow:hidden;
+    }
+    .upload-large:hover{border-color:var(--primary);background:var(--primary-bg);}
+    .upload-large.uploaded{border-style:solid;border-color:var(--success);background:var(--success-bg);}
+    .upload-large-inner{display:flex;flex-direction:column;align-items:center;gap:8px;}
+    .upload-large .upload-icon{font-size:40px;}
+    .upload-large .upload-text{font-size:14px;color:var(--text-3);}
+    .upload-large .upload-status{position:absolute;top:8px;right:8px;
+      background:var(--success);color:#fff;font-size:12px;padding:2px 8px;border-radius:var(--r-full);}
+
+    /* 身份证双列 */
+    .id-upload-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .upload-card{
+      border:1.5px dashed #C9CDD4;border-radius:var(--r-md);background:#FAFBFC;
+      cursor:pointer;transition:all var(--tr);aspect-ratio:1.6;
+      display:flex;align-items:center;justify-content:center;
+      position:relative;overflow:hidden;
+    }
+    .upload-card:hover{border-color:var(--primary);background:var(--primary-bg);}
+    .upload-card.uploaded{border-style:solid;border-color:var(--success);background:var(--success-bg);}
+    .upload-card-inner{display:flex;flex-direction:column;align-items:center;gap:6px;}
+    .upload-card .upload-icon{font-size:28px;}
+    .upload-card .upload-text{font-size:12px;color:var(--text-3);}
+    .upload-card .upload-label{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+      background:rgba(0,0,0,.5);color:#fff;font-size:11px;padding:2px 8px;border-radius:var(--r-full);}
+    .upload-card .upload-status{position:absolute;top:8px;right:8px;
+      background:var(--success);color:#fff;font-size:11px;padding:2px 8px;border-radius:var(--r-full);}
+
+    /* 表单区块 */
+    .form-section{background:#fff;border-radius:var(--r-lg);padding:16px;margin-bottom:12px;}
+    .field-row{display:grid;grid-template-columns:1fr;gap:12px;}
+    .field-row-2{grid-template-columns:1fr 1fr;}
+    .field-group{margin-bottom:14px;}
+    .field-group:last-child{margin-bottom:0;}
+    .field-label{font-size:14px;color:var(--text-1);margin-bottom:8px;display:flex;align-items:center;gap:4px;}
+    .required{color:var(--error);}
+    .input-wrap{border:1px solid #E5E6EB;border-radius:var(--r-sm);
+      background:#fff;height:44px;display:flex;align-items:center;overflow:hidden;
+      transition:border-color var(--tr);}
+    .input-wrap:focus-within{border-color:var(--primary);}
+    .input-wrap select{appearance:none;border:none;outline:none;background:transparent;
+      font-size:15px;color:var(--text-1);padding:0 32px 0 12px;height:100%;width:100%;
+      background-image:url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%2386909C' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;background-position:right 12px center;}
+    input.field-input{flex:1;height:100%;border:none;outline:none;background:transparent;
+      font-size:15px;color:var(--text-1);padding:0 12px;font-family:inherit;}
+    input.field-input::placeholder{color:#C9CDD4;}
+
+    /* 安全提示 */
+    .security-tip{
+      background:linear-gradient(90deg,#F0F9FF,#EEF3FF);
+      border:1px solid var(--primary-pale);border-radius:var(--r-md);
+      padding:12px 14px;display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;
+    }
+    .security-tip svg{flex-shrink:0;margin-top:1px;}
+    .security-tip-text{font-size:13px;color:var(--text-2);line-height:1.5;}
+
+    /* 底部按钮 */
+    .bottom-bar{position:fixed;bottom:0;left:0;right:0;
+      background:#fff;padding:12px 20px 32px;
+      display:flex;flex-direction:column;gap:10px;z-index:50;border-top:1px solid var(--border);}
+    .btn-row{display:flex;gap:12px;}
+    .btn-outline{height:48px;border:1px solid var(--border);border-radius:var(--r-sm);
+      background:#fff;color:var(--text-1);
+      font-size:16px;font-weight:500;cursor:pointer;font-family:inherit;
+      transition:all var(--tr);flex:1;}
+    .btn-outline:hover{background:var(--bg);}
+    .btn-primary{height:48px;border:none;border-radius:var(--r-sm);
+      background:var(--primary);color:#fff;
+      font-size:16px;font-weight:500;cursor:pointer;font-family:inherit;
+      transition:all var(--tr);flex:1;}
+    .btn-primary:hover:not(:disabled){filter:brightness(1.05);}
+    .btn-primary:active:not(:disabled){transform:scale(0.98);}
+    .btn-primary:disabled{background:#C9CDD4;cursor:not-allowed;}
+    .bottom-tech{font-size:12px;color:#C9CDD4;text-align:center;}
+
+    /* Toast */
+    .toast{position:fixed;top:72px;left:50%;transform:translateX(-50%) translateY(-20px);
+      background:rgba(29,33,41,.88);color:#fff;font-size:14px;padding:10px 20px;
+      border-radius:var(--r-full);backdrop-filter:blur(8px);opacity:0;
+      transition:opacity .3s,transform .3s;pointer-events:none;white-space:nowrap;z-index:999;}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+    @media(max-width:380px){
+      .id-upload-row{grid-template-columns:1fr 1fr;gap:8px;}
+      .field-row-2{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- 顶部导航 -->
+<div class="nav-bar">
+  <div class="nav-back" onclick="goBack()">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12.5 15l-5-5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    返回
+  </div>
+  <div class="nav-title">商户入驻</div>
+  <div class="nav-step">1/5</div>
+</div>
+
+<!-- 步骤条 -->
+<div class="step-bar">
+  <div class="step-list">
+    <div class="step-item active">
+      <div class="step-num"><span>1</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="step-name">填写信息</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num"><span>2</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="step-name">银盛审核</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num"><span>3</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="step-name">签约</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num"><span>4</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="step-name">微信认证</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num"><span>5</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="step-name">支付宝认证</div>
+    </div>
+  </div>
+</div>
+
+<div class="page-content">
+
+  <!-- 安全提示 -->
+  <div class="security-tip">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1L2 4v4c0 3.5 2.5 6.5 6 7.5 3.5-1 6-4 6-7.5V4L8 1z" stroke="#165DFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 8l1.5 1.5L10 6" stroke="#165DFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div class="security-tip-text">
+      请确保填写信息真实有效，审核通过后不可修改<br/>
+      <strong>带 * 号的为必填项</strong>
+    </div>
+  </div>
+
+  <!-- 营业执照信息 -->
+  <div class="upload-section">
+    <div class="section-title">营业执照信息</div>
+    <div class="upload-large" id="licenseBox" onclick="uploadLicense()">
+      <div class="upload-large-inner" id="licensePlaceholder">
+        <div class="upload-icon">📄</div>
+        <div class="upload-text">点击上传营业执照</div>
+      </div>
+      <div class="upload-status" id="licenseStatus" style="display:none;">✓ 已上传</div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="field-row">
+      <div class="field-group">
+        <div class="field-label"><span class="required">*</span>营业执照注册号</div>
+        <div class="input-wrap">
+          <input class="field-input" type="text" placeholder="请输入" maxlength="18" id="licenseNo"/>
+        </div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field-group">
+        <div class="field-label"><span class="required">*</span>商户名称</div>
+        <div class="input-wrap">
+          <input class="field-input" type="text" placeholder="请输入" maxlength="50" id="merchantName"/>
+        </div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field-group" style="margin-bottom:0">
+        <div class="field-label"><span class="required">*</span>经营地址</div>
+        <div class="input-wrap">
+          <input class="field-input" type="text" placeholder="请输入" maxlength="100" id="merchantAddr"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 法人信息 -->
+  <div class="upload-section">
+    <div class="section-title">法人信息</div>
+    <div class="id-upload-row">
+      <div class="upload-card" id="legalFrontBox" onclick="uploadLegal('front')">
+        <div class="upload-card-inner" id="legalFrontPlaceholder">
+          <div class="upload-icon">📷</div>
+          <div class="upload-text">身份证正面</div>
+        </div>
+        <div class="upload-status" id="legalFrontStatus" style="display:none;">✓</div>
+      </div>
+      <div class="upload-card" id="legalBackBox" onclick="uploadLegal('back')">
+        <div class="upload-card-inner" id="legalBackPlaceholder">
+          <div class="upload-icon">📷</div>
+          <div class="upload-text">身份证反面</div>
+        </div>
+        <div class="upload-status" id="legalBackStatus" style="display:none;">✓</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="field-row field-row-2">
+      <div class="field-group">
+        <div class="field-label"><span class="required">*</span>法人姓名</div>
+        <div class="input-wrap">
+          <input class="field-input" type="text" placeholder="请输入" maxlength="20" id="legalName"/>
+        </div>
+      </div>
+      <div class="field-group">
+        <div class="field-label"><span class="required">*</span>法人身份证号</div>
+        <div class="input-wrap">
+          <input class="field-input" type="text" placeholder="请输入" maxlength="18" id="legalIdCard"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 结算账户信息 -->
+  <div class="section-title">结算账户信息</div>
+  <div class="form-section">
+    <div class="field-row">
+      <div class="field-group">
+        <div class="field-label"><span class="required">*</span>开户银行</div>
+        <div class="input-wrap">
+          <select id="bankName">
+            <option value="">请选择银行</option>
+            <option value="ICBC">中国工商银行</option>
+            <option value="ABC">中国农业银行</option>
+            <option value="BOC">中国银行</option>
+            <option value="CCB">中国建设银行</option>
+            <option value="COMM">交通银行</option>
+            <option value="CMB">招商银行</option>
+            <option value="CITIC">中信银行</option>
+            <option value="CEB">中国光大银行</option>
+            <option value="HXB">华夏银行</option>
+            <option value="CMBC">中国民生银行</option>
+            <option value="GDB">广发银行</option>
+            <option value="PAB">平安银行</option>
+            <option value="PSBC">中国邮政储蓄银行</option>
+            <option value="SPDB">浦发银行</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field-group">
+        <div class="field-label"><span class="required">*</span>对公账户</div>
+        <div class="input-wrap">
+          <input class="field-input" type="text" placeholder="请输入对公账户" maxlength="30" id="publicAccount"/>
+        </div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field-group" style="margin-bottom:0">
+        <div class="field-label"><span class="required">*</span>账户名称</div>
+        <div class="input-wrap">
+          <input class="field-input" type="text" placeholder="请输入账户名称" maxlength="50" id="accountName"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 联系人信息 -->
+  <div class="section-title">联系人信息</div>
+  <div class="form-section">
+    <div class="field-row field-row-2">
+      <div class="field-group">
+        <div class="field-label">联系人姓名</div>
+        <div class="input-wrap">
+          <input class="field-input" type="text" placeholder="选填" maxlength="20" id="contactName"/>
+        </div>
+      </div>
+      <div class="field-group" style="margin-bottom:0">
+        <div class="field-label">联系人手机</div>
+        <div class="input-wrap">
+          <input class="field-input" type="tel" placeholder="选填" maxlength="11" id="contactPhone"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height:16px;"></div>
+</div>
+
+<!-- 底部按钮 -->
+<div class="bottom-bar">
+  <div class="btn-row">
+    <button class="btn-outline" onclick="goBack()">暂存</button>
+    <button class="btn-primary" id="submitBtn" onclick="handleSubmit()">提交审核</button>
+  </div>
+  <div class="bottom-tech">由银盛提供技术支持</div>
+</div>
+
+<script>
+  let uploadedLicense = false;
+  let uploadedLegalFront = false;
+  let uploadedLegalBack = false;
+
+  function showToast(msg, d = 2000) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._t);
+    t._t = setTimeout(() => t.classList.remove('show'), d);
+  }
+
+  function goBack() {
+    window.location.href = 'yinsheng-account-type.html';
+  }
+
+  function uploadLicense() {
+    const box = document.getElementById('licenseBox');
+    const placeholder = document.getElementById('licensePlaceholder');
+    const status = document.getElementById('licenseStatus');
+    if (!uploadedLicense) {
+      showToast('📄 点击上传营业执照');
+      // 模拟上传
+      setTimeout(() => {
+        uploadedLicense = true;
+        box.classList.add('uploaded');
+        placeholder.style.display = 'none';
+        status.style.display = 'block';
+        showToast('✓ 营业执照上传成功');
+      }, 800);
+    } else {
+      showToast('📄 点击重新上传营业执照');
+    }
+  }
+
+  function uploadLegal(side) {
+    const box = document.getElementById(side === 'front' ? 'legalFrontBox' : 'legalBackBox');
+    const placeholder = document.getElementById(side === 'front' ? 'legalFrontPlaceholder' : 'legalBackPlaceholder');
+    const status = document.getElementById(side === 'front' ? 'legalFrontStatus' : 'legalBackStatus');
+    const key = side === 'front' ? 'uploadedLegalFront' : 'uploadedLegalBack';
+
+    if (!window[key]) {
+      showToast(`📷 点击上传身份证${side === 'front' ? '正面' : '反面'}`);
+      setTimeout(() => {
+        window[key] = true;
+        box.classList.add('uploaded');
+        placeholder.style.display = 'none';
+        status.style.display = 'block';
+        showToast(`✓ 身份证${side === 'front' ? '正面' : '反面'}上传成功`);
+      }, 600);
+    } else {
+      showToast(`📷 点击重新上传身份证${side === 'front' ? '正面' : '反面'}`);
+    }
+  }
+
+  function validateForm() {
+    if (!uploadedLicense) {
+      showToast('请上传营业执照');
+      return false;
+    }
+    const licenseNo = document.getElementById('licenseNo').value.trim();
+    const merchantName = document.getElementById('merchantName').value.trim();
+    const merchantAddr = document.getElementById('merchantAddr').value.trim();
+    if (!licenseNo) {
+      showToast('请填写营业执照注册号');
+      return false;
+    }
+    if (!merchantName) {
+      showToast('请填写商户名称');
+      return false;
+    }
+    if (!merchantAddr) {
+      showToast('请填写经营地址');
+      return false;
+    }
+    if (!uploadedLegalFront || !uploadedLegalBack) {
+      showToast('请上传法人身份证正反面');
+      return false;
+    }
+    const legalName = document.getElementById('legalName').value.trim();
+    const legalIdCard = document.getElementById('legalIdCard').value.trim();
+    if (!legalName) {
+      showToast('请填写法人姓名');
+      return false;
+    }
+    if (!legalIdCard) {
+      showToast('请填写法人身份证号');
+      return false;
+    }
+    if (legalIdCard.length !== 18) {
+      showToast('法人身份证号格式不正确');
+      return false;
+    }
+    const bankName = document.getElementById('bankName').value;
+    const publicAccount = document.getElementById('publicAccount').value.trim();
+    const accountName = document.getElementById('accountName').value.trim();
+    if (!bankName) {
+      showToast('请选择开户银行');
+      return false;
+    }
+    if (!publicAccount) {
+      showToast('请填写对公账户');
+      return false;
+    }
+    if (!accountName) {
+      showToast('请填写账户名称');
+      return false;
+    }
+    return true;
+  }
+
+  function handleSubmit() {
+    if (!validateForm()) return;
+    showToast('⏳ 正在提交审核…');
+    setTimeout(() => {
+      window.location.href = 'yinsheng-signing-processing.html';
+    }, 1200);
+  }
+</script>
+</body>
+</html>

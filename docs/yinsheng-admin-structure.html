@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>银盛钱包后台管理系统 · 功能结构图</title>
+  <style>
+    :root {
+      --primary: #165DFF;
+      --primary-light: #4080FF;
+      --primary-pale: #EEF3FF;
+      --success: #00B42A;
+      --success-pale: #E8FFEA;
+      --warning: #FF7D00;
+      --warning-pale: #FFF3E8;
+      --error: #F53F3F;
+      --error-pale: #FFECE8;
+      --purple: #7B61FF;
+      --purple-pale: #F2F0FF;
+      --text-1: #1D2129;
+      --text-2: #4E5969;
+      --text-3: #86909C;
+      --border: #E5E6EB;
+      --bg: #F7F8FA;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      padding: 40px 32px 60px;
+      -webkit-font-smoothing: antialiased;
+      color: var(--text-1);
+    }
+
+    /* ── 页头 ── */
+    .page-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .page-header h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text-1);
+      margin-bottom: 8px;
+    }
+    .page-header h1 span { color: var(--primary); }
+    .page-header p {
+      font-size: 14px;
+      color: var(--text-3);
+    }
+    .version-badge {
+      display: inline-block;
+      margin-top: 10px;
+      background: var(--primary-pale);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 12px;
+      border-radius: 9999px;
+    }
+
+    /* ── 根节点 ── */
+    .root-node {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 0;
+    }
+    .root-box {
+      background: linear-gradient(135deg, #165DFF, #4080FF);
+      color: #fff;
+      border-radius: 16px;
+      padding: 18px 48px;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      box-shadow: 0 8px 24px rgba(22,93,255,0.30);
+      position: relative;
+    }
+    .root-box::after {
+      content: '';
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 20px;
+      background: var(--border);
+    }
+
+    /* ── 水平连线层 ── */
+    .h-line-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 0;
+      position: relative;
+    }
+    .h-line {
+      height: 2px;
+      background: var(--border);
+      /* 宽度由 JS 动态计算，用 CSS 百分比近似 */
+    }
+
+    /* ── 模块行 ── */
+    .modules-row {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 0;
+    }
+
+    /* ── 每个主模块列 ── */
+    .module-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 200px;
+    }
+    .module-stem {
+      width: 2px;
+      height: 20px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    /* ── 模块标题卡 ── */
+    .module-card {
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      border: 1px solid rgba(229,230,235,0.8);
+    }
+    .module-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .module-icon {
+      font-size: 18px;
+      line-height: 1;
+    }
+    .module-body {
+      background: #fff;
+      padding: 10px 0 4px;
+    }
+
+    /* ── 功能子项 ── */
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+      padding: 7px 14px;
+      font-size: 12.5px;
+      color: var(--text-2);
+      border-bottom: 1px solid #F7F8FA;
+      line-height: 1.45;
+      cursor: default;
+      transition: background .15s;
+    }
+    .feature-item:last-child { border-bottom: none; }
+    .feature-item:hover { background: var(--bg); }
+    .feature-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+
+    /* 颜色主题 */
+    .theme-blue .module-header  { background: var(--primary-pale); color: var(--primary); }
+    .theme-blue .feature-dot    { background: var(--primary); }
+
+    .theme-green .module-header { background: var(--success-pale); color: var(--success); }
+    .theme-green .feature-dot   { background: var(--success); }
+
+    .theme-orange .module-header{ background: var(--warning-pale); color: var(--warning); }
+    .theme-orange .feature-dot  { background: var(--warning); }
+
+    .theme-red .module-header   { background: var(--error-pale); color: var(--error); }
+    .theme-red .feature-dot     { background: var(--error); }
+
+    .theme-purple .module-header{ background: var(--purple-pale); color: var(--purple); }
+    .theme-purple .feature-dot  { background: var(--purple); }
+
+    /* ── 子功能高亮标签 ── */
+    .feat-tag {
+      display: inline-block;
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 9999px;
+      font-weight: 600;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+    .tag-core { background: #FEFFE6; color: #A8960A; }
+    .tag-v2   { background: #F2F0FF; color: #7B61FF; }
+
+    /* ── SVG 连线层 ── */
+    #connector-svg {
+      position: absolute;
+      top: 0; left: 0;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    /* ── 图例 ── */
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 40px;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-3);
+    }
+    .legend-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+    }
+    .legend-line {
+      width: 24px; height: 2px; background: var(--border);
+    }
+
+    /* ── 底部流程说明 ── */
+    .flow-note {
+      margin-top: 48px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 28px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    }
+    .flow-note h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-1);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .flow-steps-line {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      flex-wrap: wrap;
+      row-gap: 12px;
+    }
+    .flow-step-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .flow-step-circle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .flow-step-name {
+      font-size: 11px;
+      color: var(--text-3);
+      white-space: nowrap;
+    }
+    .flow-arrow-icon {
+      font-size: 18px;
+      color: var(--border);
+      padding: 0 6px;
+      margin-bottom: 16px;
+      flex-shrink: 0;
+    }
+    .flow-branch {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .flow-branch-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+    }
+    .flow-branch-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+
+    /* ── 核心价值区 ── */
+    .value-section {
+      margin-top: 32px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .value-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .value-card h4 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .value-card ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .value-card ul li {
+      font-size: 12.5px;
+      color: var(--text-2);
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      line-height: 1.5;
+    }
+    .value-card ul li::before {
+      content: '→';
+      font-size: 11px;
+      color: var(--primary);
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 1300px) {
+      body { padding: 24px 16px 40px; }
+      .modules-row { gap: 12px; }
+      .module-col { width: 176px; }
+      .value-section { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 页头 -->
+<div class="page-header">
+  <h1>银盛钱包 · <span>商户入驻后台</span>功能结构图</h1>
+  <p>后台管理系统 · 核心功能模块拆解</p>
+  <span class="version-badge">V1.1 · 2026-04-06</span>
+</div>
+
+<!-- 根节点 -->
+<div class="root-node">
+  <div class="root-box" id="rootBox">
+    🏦 银盛钱包后台管理系统
+  </div>
+</div>
+
+<!-- 树形结构容器（相对定位，用于SVG连线） -->
+<div style="position:relative;" id="treeWrap">
+  <!-- SVG连线层 -->
+  <svg id="connector-svg" style="width:100%;height:100%;"></svg>
+
+  <!-- 模块行 -->
+  <div class="modules-row" id="modulesRow" style="padding-top:40px;">
+
+    <!-- 1. 商户入驻（新增核心） -->
+    <div class="module-col" id="col0">
+      <div class="module-stem"></div>
+      <div class="module-card theme-green" style="width:220px;">
+        <div class="module-header">
+          <span class="module-icon">✨</span>
+          <span>商户入驻 <span class="feat-tag tag-core">新增</span></span>
+        </div>
+        <div class="module-body">
+          <div class="feature-item"><span class="feature-dot"></span>新增商户（代录入）</div>
+          <div class="feature-item"><span class="feature-dot"></span>代为上传证件照片</div>
+          <div class="feature-item"><span class="feature-dot"></span>代填写身份信息</div>
+          <div class="feature-item"><span class="feature-dot"></span>代为签约（签名）</div>
+          <div class="feature-item"><span class="feature-dot"></span>代绑定银行卡</div>
+          <div class="feature-item"><span class="feature-dot"></span>代设置支付密码</div>
+          <div class="feature-item"><span class="feature-dot"></span>批量导入（Excel）</div>
+          <div class="feature-item"><span class="feature-dot"></span>入驻来源标记<br/><span style="color:var(--text-3);font-size:11px;">线上自申请 / 后台代录入</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 商户列表 -->
+    <div class="module-col" id="col1">
+      <div class="module-stem"></div>
+      <div class="module-card theme-blue">
+        <div class="module-header">
+          <span class="module-icon">👥</span>
+          <span>商户列表</span>
+        </div>
+        <div class="module-body">
+          <div class="feature-item"><span class="feature-dot"></span>手机号 / 姓名搜索</div>
+          <div class="feature-item"><span class="feature-dot"></span>状态筛选<br/><span style="color:var(--text-3);font-size:11px;">进行中/待审核/完成/拒绝</span></div>
+          <div class="feature-item"><span class="feature-dot"></span>来源筛选<br/><span style="color:var(--text-3);font-size:11px;">线上自申请 / 后台代录入</span></div>
+          <div class="feature-item"><span class="feature-dot"></span>申请时间筛选</div>
+          <div class="feature-item"><span class="feature-dot"></span>导出 Excel</div>
+          <div class="feature-item"><span class="feature-dot"></span>快速跳转商户详情</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 商户详情（核心） -->
+    <div class="module-col" id="col2" style="width:220px;">
+      <div class="module-stem"></div>
+      <div class="module-card theme-orange" style="width:220px;">
+        <div class="module-header">
+          <span class="module-icon">🗂️</span>
+          <span>商户详情 <span class="feat-tag tag-core">核心</span></span>
+        </div>
+        <div class="module-body">
+          <div class="feature-item"><span class="feature-dot"></span>6步骤进度时间线</div>
+          <div class="feature-item"><span class="feature-dot"></span>身份证照片查看</div>
+          <div class="feature-item"><span class="feature-dot"></span>实名 / 银行卡信息</div>
+          <div class="feature-item"><span class="feature-dot"></span>合同 / 签名查看</div>
+          <div class="feature-item"><span class="feature-dot"></span>全流程操作日志</div>
+          <div class="feature-item"><span class="feature-dot"></span>入驻来源 / 操作人</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. 继续入驻邀请（核心） -->
+    <div class="module-col" id="col3" style="width:220px;">
+      <div class="module-stem"></div>
+      <div class="module-card theme-green" style="width:220px;">
+        <div class="module-header">
+          <span class="module-icon">🔗</span>
+          <span>邀请继续入驻 <span class="feat-tag tag-core">核心</span></span>
+        </div>
+        <div class="module-body">
+          <div class="feature-item"><span class="feature-dot"></span>一键生成邀请链接</div>
+          <div class="feature-item"><span class="feature-dot"></span>指定继续的步骤</div>
+          <div class="feature-item"><span class="feature-dot"></span>链接有效期设置<br/><span style="color:var(--text-3);font-size:11px;">24h / 7天 / 30天</span></div>
+          <div class="feature-item"><span class="feature-dot"></span>短信 / 复制 发送</div>
+          <div class="feature-item"><span class="feature-dot"></span>邀请状态追踪<br/><span style="color:var(--text-3);font-size:11px;">已发/已打开/已完成</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. 审核管理 -->
+    <div class="module-col" id="col4">
+      <div class="module-stem"></div>
+      <div class="module-card theme-red">
+        <div class="module-header">
+          <span class="module-icon">🔍</span>
+          <span>审核管理</span>
+        </div>
+        <div class="module-body">
+          <div class="feature-item"><span class="feature-dot"></span>待审核队列</div>
+          <div class="feature-item"><span class="feature-dot"></span>审核详情核对</div>
+          <div class="feature-item"><span class="feature-dot"></span>通过 / 拒绝操作</div>
+          <div class="feature-item"><span class="feature-dot"></span>拒绝原因填写</div>
+          <div class="feature-item"><span class="feature-dot"></span>批量审核<br/><span class="feat-tag tag-v2">V1.2</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. 仪表盘 -->
+    <div class="module-col" id="col5">
+      <div class="module-stem"></div>
+      <div class="module-card theme-blue">
+        <div class="module-header">
+          <span class="module-icon">📊</span>
+          <span>运营仪表盘</span>
+        </div>
+        <div class="module-body">
+          <div class="feature-item"><span class="feature-dot"></span>今日新增入驻数</div>
+          <div class="feature-item"><span class="feature-dot"></span>各状态商户统计</div>
+          <div class="feature-item"><span class="feature-dot"></span>入驻来源分布<br/><span style="color:var(--text-3);font-size:11px;">线上 vs 后台代录入</span></div>
+          <div class="feature-item"><span class="feature-dot"></span>近7天入驻趋势</div>
+          <div class="feature-item"><span class="feature-dot"></span>步骤转化漏斗</div>
+          <div class="feature-item"><span class="feature-dot"></span>平均审核时长</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /modules-row -->
+</div><!-- /treeWrap -->
+
+<!-- 图例 -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--success)"></div> 商户入驻</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--primary)"></div> 商户管理</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--warning)"></div> 核心模块</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--error)"></div> 审核流程</div>
+  <div class="legend-item"><div class="legend-line"></div> 关联关系</div>
+  <div class="legend-item"><span class="feat-tag tag-core" style="margin:0;">核心</span> MVP核心功能</div>
+  <div class="legend-item"><span class="feat-tag tag-v2" style="margin:0;">V1.1</span> 新增迭代</div>
+  <div class="legend-item"><span class="feat-tag tag-core" style="margin:0;background:#E8FFEA;color:#00B42A;">新增</span> 本期新增</div>
+</div>
+
+<!-- 核心流程说明 -->
+<div class="flow-note">
+  <h3>
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M2 8h12M9 4l4 4-4 4" stroke="#165DFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    C端入驻流程 → 后台跟进逻辑
+  </h3>
+  <div class="flow-steps-line">
+
+    <div class="flow-step-box">
+      <div class="flow-step-circle" style="background:#EEF3FF;">📱</div>
+      <div class="flow-step-name">短信登录</div>
+    </div>
+    <div class="flow-arrow-icon">›</div>
+
+    <div class="flow-step-box">
+      <div class="flow-step-circle" style="background:#FFF3E8;">📋</div>
+      <div class="flow-step-name">入驻申请</div>
+    </div>
+    <div class="flow-arrow-icon">›</div>
+
+    <div class="flow-step-box">
+      <div class="flow-step-circle" style="background:#EEF3FF;">🔍</div>
+      <div class="flow-step-name">银盛审核</div>
+    </div>
+
+    <!-- 审核分支 -->
+    <div class="flow-branch" style="margin:0 8px 0 4px;">
+      <div class="flow-branch-item"><div class="flow-branch-dot" style="background:var(--success)"></div><span style="color:var(--success);">通过 →</span></div>
+      <div class="flow-branch-item"><div class="flow-branch-dot" style="background:var(--error)"></div><span style="color:var(--error);">失败 → 可重提</span></div>
+      <div class="flow-branch-item"><div class="flow-branch-dot" style="background:var(--text-3)"></div><span style="color:var(--text-3);">拒绝 → 仅展示</span></div>
+    </div>
+
+    <div class="flow-step-box">
+      <div class="flow-step-circle" style="background:#FFF7E8;">✍️</div>
+      <div class="flow-step-name">签约确认</div>
+    </div>
+    <div class="flow-arrow-icon">›</div>
+
+    <div class="flow-step-box">
+      <div class="flow-step-circle" style="background:#E8FFEA;">🏦</div>
+      <div class="flow-step-name">绑定银行卡</div>
+    </div>
+    <div class="flow-arrow-icon">›</div>
+
+    <div class="flow-step-box">
+      <div class="flow-step-circle" style="background:#EEF3FF;">🔐</div>
+      <div class="flow-step-name">安全设置</div>
+    </div>
+    <div class="flow-arrow-icon">›</div>
+
+    <div class="flow-step-box">
+      <div class="flow-step-circle" style="background:#E8FFEA;">🎉</div>
+      <div class="flow-step-name">申请成功</div>
+    </div>
+
+    <!-- 后台跟进标注 -->
+    <div style="margin-left:24px;padding:12px 16px;background:var(--primary-pale);border-radius:10px;font-size:12px;line-height:1.8;color:var(--primary);">
+      <strong>后台跟进节点</strong><br/>
+      任意步骤中断 → 商户列表可见<br/>
+      一键发「继续入驻」链接给客户<br/>
+      审核步骤 → 进入审核管理队列<br/>
+      <span style="color:var(--success);">运营也可直接代为操作完成入驻</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- 三大核心价值 -->
+<div class="value-section" style="grid-template-columns: repeat(3, 1fr);">
+
+  <div class="value-card">
+    <h4 style="color:var(--success);">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M13 8.5A5 5 0 113 7" stroke="#00B42A" stroke-width="1.3" stroke-linecap="round"/>
+        <path d="M13 5v3.5H9.5" stroke="#00B42A" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      核心价值一：代为入驻
+    </h4>
+    <ul>
+      <li>后台直接帮商户完成各步骤</li>
+      <li>代上传证件、代填信息</li>
+      <li>代为签约、代绑银行卡</li>
+      <li>支持批量导入Excel</li>
+    </ul>
+  </div>
+
+  <div class="value-card">
+    <h4 style="color:var(--warning);">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 2a6 6 0 100 12A6 6 0 008 2z" stroke="#FF7D00" stroke-width="1.3"/>
+        <path d="M8 5v4l2.5 1.5" stroke="#FF7D00" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+      核心价值二：进展可视
+    </h4>
+    <ul>
+      <li>每个商户6步进度一目了然</li>
+      <li>卡在哪一步、卡了多久清晰标注</li>
+      <li>身份证照片、合同签名可直接查看</li>
+      <li>全流程操作日志可追溯</li>
+    </ul>
+  </div>
+
+  <div class="value-card">
+    <h4 style="color:var(--primary);">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M2 12l4-4 3 3 5-7" stroke="#165DFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      核心价值三：主动触达
+    </h4>
+    <ul>
+      <li>一键生成「继续入驻」邀请链接</li>
+      <li>链接精准定位到中断步骤</li>
+      <li>短信直达客户手机，降低操作门槛</li>
+      <li>追踪链接打开/完成情况，知晓效果</li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- 连线 JS -->
+<script>
+  window.addEventListener('load', () => {
+    const svg = document.getElementById('connector-svg');
+    const wrap = document.getElementById('treeWrap');
+    const root = document.getElementById('rootBox');
+    const row  = document.getElementById('modulesRow');
+    const cols = Array.from(row.querySelectorAll('.module-col'));
+
+    function getCenter(el, relTo) {
+      const r  = el.getBoundingClientRect();
+      const rr = relTo.getBoundingClientRect();
+      return {
+        x: r.left - rr.left + r.width / 2,
+        y: r.top  - rr.top  + r.height / 2,
+        top: r.top - rr.top,
+        bottom: r.bottom - rr.top,
+        left: r.left - rr.left,
+        right: r.right - rr.left,
+      };
+    }
+
+    const wrapRect = wrap.getBoundingClientRect();
+    svg.setAttribute('width', wrapRect.width);
+    svg.setAttribute('height', wrapRect.height + 20);
+
+    // root 底部中心
+    const rootR = root.getBoundingClientRect();
+    const wrapR = wrap.getBoundingClientRect();
+    const rootX = rootR.left - wrapR.left + rootR.width / 2;
+    const rootY = rootR.bottom - wrapR.top;
+
+    // 各列顶部中心
+    const colTops = cols.map(col => {
+      const r = col.getBoundingClientRect();
+      return {
+        x: r.left - wrapR.left + r.width / 2,
+        y: r.top - wrapR.top,
+      };
+    });
+
+    // 水平连线 y
+    const midY = rootY + 20;
+
+    // 画从 root 到 midY 的垂直线
+    const lineDown = document.createElementNS('http://www.w3.org/2000/svg','line');
+    lineDown.setAttribute('x1', rootX); lineDown.setAttribute('y1', rootY);
+    lineDown.setAttribute('x2', rootX); lineDown.setAttribute('y2', midY);
+    lineDown.setAttribute('stroke', '#C9CDD4'); lineDown.setAttribute('stroke-width','2');
+    svg.appendChild(lineDown);
+
+    // 水平主干线
+    const leftX  = colTops[0].x;
+    const rightX = colTops[colTops.length - 1].x;
+    const hLine = document.createElementNS('http://www.w3.org/2000/svg','line');
+    hLine.setAttribute('x1', leftX);  hLine.setAttribute('y1', midY);
+    hLine.setAttribute('x2', rightX); hLine.setAttribute('y2', midY);
+    hLine.setAttribute('stroke','#C9CDD4'); hLine.setAttribute('stroke-width','2');
+    svg.appendChild(hLine);
+
+    // 各列垂直线（从 midY 到列顶）
+    colTops.forEach(col => {
+      const vLine = document.createElementNS('http://www.w3.org/2000/svg','line');
+      vLine.setAttribute('x1', col.x); vLine.setAttribute('y1', midY);
+      vLine.setAttribute('x2', col.x); vLine.setAttribute('y2', col.y);
+      vLine.setAttribute('stroke','#C9CDD4'); vLine.setAttribute('stroke-width','2');
+      svg.appendChild(vLine);
+    });
+  });
+</script>
+
+</body>
+</html>

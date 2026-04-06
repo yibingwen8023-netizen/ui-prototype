@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>银盛钱包 · 绑定提现银行卡</title>
+  <style>
+    :root{
+      --primary:#165DFF;--primary-light:#4080FF;--primary-bg:#EEF3FF;--primary-pale:#D6E4FF;
+      --success:#00B42A;--success-bg:#E8FFEA;
+      --error:#F53F3F;--error-bg:#FFECE8;
+      --text-1:#1D2129;--text-2:#4E5969;--text-3:#86909C;--text-dis:#C9CDD4;
+      --border:#E5E6EB;--bg:#F2F3F5;--card:#FFFFFF;
+      --r-sm:6px;--r-md:10px;--r-lg:16px;--r-full:9999px;
+      --shadow-card:0 4px 20px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.04);
+      --tr:200ms cubic-bezier(0.4,0,0.2,1);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;
+      background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased;padding-bottom:100px;}
+
+    /* 步骤条 */
+    .step-bar{background:#fff;padding:20px 16px 16px;border-bottom:1px solid var(--border);}
+    .step-list{display:flex;align-items:flex-start;justify-content:space-between;position:relative;}
+    .step-list::before{content:'';position:absolute;top:14px;left:28px;right:28px;height:2px;background:#E5E6EB;z-index:0;}
+    .step-item{display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;z-index:1;flex:1;}
+    .step-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+      font-size:13px;font-weight:600;background:#E5E6EB;color:#86909C;transition:all var(--tr);}
+    .step-item.active .step-num{background:var(--primary);color:#fff;}
+    .step-item.done .step-num{background:var(--primary);color:#fff;}
+    .step-num svg{display:none;}
+    .step-item.done .step-num span{display:none;}
+    .step-item.done .step-num svg{display:block;}
+    .step-name{font-size:12px;color:#86909C;white-space:nowrap;}
+    .step-item.active .step-name{color:var(--primary);font-weight:500;}
+    .step-item.done .step-name{color:var(--text-1);}
+
+    .page-content{max-width:480px;margin:0 auto;padding:24px 16px 0;}
+
+    /* 银行卡输入卡片 */
+    .bank-card{background:#fff;border-radius:var(--r-lg);box-shadow:var(--shadow-card);
+      border:1px solid rgba(229,230,235,.6);margin-bottom:16px;overflow:hidden;}
+    .bank-card-header{padding:16px 20px;border-bottom:1px solid var(--border);
+      display:flex;align-items:center;gap:10px;}
+    .bank-card-icon{width:36px;height:36px;border-radius:var(--r-sm);background:#FFF7E8;
+      display:flex;align-items:center;justify-content:center;}
+    .bank-card-title{font-size:15px;font-weight:600;color:var(--text-1);}
+    .bank-card-body{padding:20px 16px;}
+    
+    /* 卡号输入 */
+    .card-input-wrap{position:relative;margin-bottom:16px;}
+    .card-input-row{border:1.5px solid var(--border);border-radius:var(--r-md);
+      background:#FAFBFC;height:52px;display:flex;align-items:center;overflow:hidden;
+      transition:border-color var(--tr),box-shadow var(--tr),background var(--tr);}
+    .card-input-row:focus-within{border-color:var(--primary);background:#fff;
+      box-shadow:0 0 0 3px rgba(22,93,255,.10);}
+    input.card-input{flex:1;height:100%;border:none;outline:none;background:transparent;
+      font-size:18px;color:var(--text-1);padding:0 16px;font-family:'Courier New',monospace;letter-spacing:2px;}
+    input.card-input::placeholder{color:var(--text-3);font-size:15px;letter-spacing:0;font-family:inherit;}
+    
+    /* 银行识别结果 */
+    .bank-info{display:flex;align-items:center;gap:12px;padding:12px 16px;
+      background:var(--primary-bg);border-radius:var(--r-md);margin-bottom:20px;}
+    .bank-info.hidden{display:none;}
+    .bank-logo{width:32px;height:32px;border-radius:50%;
+      background:linear-gradient(135deg,#165DFF,#4080FF);
+      display:flex;align-items:center;justify-content:center;
+      font-size:12px;color:#fff;font-weight:700;}
+    .bank-detail{flex:1;}
+    .bank-name{font-size:14px;font-weight:600;color:var(--text-1);}
+    .bank-type{font-size:12px;color:var(--text-3);margin-top:2px;}
+    .bank-status{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--success);}
+    
+    /* 分隔线 */
+    .section-divider{height:1px;background:var(--border);margin:20px 0;}
+    
+    /* 手机号显示 */
+    .phone-display{display:flex;align-items:center;justify-content:space-between;
+      padding:12px 16px;background:#F7F8FA;border-radius:var(--r-md);margin-bottom:16px;}
+    .phone-label{font-size:12px;color:var(--text-3);margin-bottom:2px;}
+    .phone-number{font-size:15px;font-weight:600;color:var(--text-1);letter-spacing:1px;}
+    .phone-edit{font-size:13px;color:var(--primary);cursor:pointer;padding:4px 8px;border-radius:var(--r-sm);}
+    .phone-edit:hover{background:var(--primary-bg);}
+    
+    /* 验证码输入 */
+    .code-label{font-size:13px;font-weight:500;color:var(--text-2);margin-bottom:8px;
+      display:flex;align-items:center;gap:4px;}
+    .code-required{color:var(--error);font-size:12px;}
+    .code-input-row{border:1.5px solid var(--border);border-radius:var(--r-md);
+      background:#FAFBFC;height:48px;display:flex;align-items:center;overflow:hidden;
+      transition:border-color var(--tr),box-shadow var(--tr),background var(--tr);}
+    .code-input-row:focus-within{border-color:var(--primary);background:#fff;
+      box-shadow:0 0 0 3px rgba(22,93,255,.10);}
+    .code-input-row.has-error{border-color:var(--error);box-shadow:0 0 0 3px rgba(245,63,63,.08);}
+    input.code-input{flex:1;height:100%;border:none;outline:none;background:transparent;
+      font-size:16px;color:var(--text-1);padding:0 10px;font-family:inherit;letter-spacing:3px;text-align:center;}
+    input.code-input::placeholder{color:var(--text-3);font-size:13px;letter-spacing:0;}
+    .btn-sms{flex-shrink:0;height:100%;padding:0 10px;border:none;
+      border-left:1.5px solid var(--border);background:transparent;
+      color:var(--primary);font-size:12px;font-weight:600;cursor:pointer;
+      white-space:nowrap;font-family:inherit;transition:background var(--tr);}
+    .btn-sms:hover:not(:disabled){background:var(--primary-bg);}
+    .btn-sms:disabled{color:var(--text-dis);cursor:not-allowed;}
+    .code-error{font-size:12px;color:var(--error);margin-top:6px;
+      display:flex;align-items:center;gap:4px;}
+    .code-hint{font-size:12px;color:var(--text-3);margin-top:6px;}
+
+    /* 安全提示 - 轻量 banner */
+    .security-tip{display:flex;align-items:center;gap:6px;
+      padding:8px 12px;background:var(--primary-bg);
+      border-radius:var(--r-full);margin-bottom:16px;}
+    .security-tip svg{flex-shrink:0;}
+    .security-tip-text{font-size:12px;color:var(--text-2);line-height:1.4;}
+    .security-tip-text strong{color:var(--primary);font-weight:500;}
+
+    /* 底部 */
+    .bottom-bar{position:fixed;bottom:0;left:0;right:0;
+      background:rgba(255,255,255,.95);backdrop-filter:blur(12px);
+      border-top:1px solid var(--border);padding:12px 20px 24px;
+      display:flex;flex-direction:column;gap:10px;z-index:50;}
+    .btn-primary{height:52px;border:none;border-radius:var(--r-full);
+      background:linear-gradient(90deg,#165DFF,#4080FF);color:#fff;
+      font-size:16px;font-weight:600;letter-spacing:.5px;cursor:pointer;font-family:inherit;
+      box-shadow:0 4px 12px rgba(22,93,255,.30);transition:all var(--tr);}
+    .btn-primary:disabled{background:#C9CDD4;box-shadow:none;cursor:not-allowed;}
+    .btn-primary.loading{pointer-events:none;}
+    .btn-primary.loading::after{content:'';display:inline-block;width:16px;height:16px;
+      border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;
+      animation:spin .7s linear infinite;margin-left:8px;vertical-align:-2px;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* Toast */
+    .toast{position:fixed;top:72px;left:50%;transform:translateX(-50%) translateY(-20px);
+      background:rgba(29,33,41,.88);color:#fff;font-size:14px;padding:10px 20px;
+      border-radius:var(--r-full);backdrop-filter:blur(8px);opacity:0;
+      transition:opacity .3s,transform .3s;pointer-events:none;white-space:nowrap;z-index:999;}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+    /* 更换手机号弹窗 */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);
+      display:flex;align-items:flex-end;justify-content:center;z-index:200;opacity:0;pointer-events:none;
+      transition:opacity .3s;}
+    .modal-overlay.show{opacity:1;pointer-events:auto;}
+    .modal-content{background:#fff;border-radius:var(--r-lg) var(--r-lg) 0 0;width:100%;max-width:480px;
+      padding:24px 20px 32px;transform:translateY(100%);transition:transform .3s cubic-bezier(.34,1.56,.64,1);}
+    .modal-overlay.show .modal-content{transform:translateY(0);}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+    .modal-title{font-size:17px;font-weight:600;color:var(--text-1);}
+    .modal-close{width:32px;height:32px;border:none;background:transparent;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-3);}
+    .modal-close:hover{background:var(--bg);}
+    .modal-input-wrap{margin-bottom:20px;}
+    .modal-input-label{font-size:13px;color:var(--text-3);margin-bottom:8px;}
+    .modal-input{border:1.5px solid var(--border);border-radius:var(--r-md);height:52px;width:100%;
+      padding:0 16px;font-size:16px;color:var(--text-1);transition:border-color var(--tr),box-shadow var(--tr);
+      font-family:inherit;}
+    .modal-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(22,93,255,.10);}
+    .modal-btn{height:52px;width:100%;border:none;border-radius:var(--r-full);
+      background:linear-gradient(90deg,#165DFF,#4080FF);color:#fff;font-size:16px;font-weight:600;
+      cursor:pointer;font-family:inherit;transition:all var(--tr);}
+    .modal-btn:disabled{background:#C9CDD4;cursor:not-allowed;}
+  </style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- 步骤条 -->
+<div class="step-bar">
+  <div class="step-list">
+    <div class="step-item done">
+      <div class="step-num"><span>1</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step-name">填写资料</div>
+    </div>
+    <div class="step-item done">
+      <div class="step-num"><span>2</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step-name">银盛审核</div>
+    </div>
+    <div class="step-item done">
+      <div class="step-num"><span>3</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step-name">签约确认</div>
+    </div>
+    <div class="step-item active">
+      <div class="step-num"><span>4</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step-name">绑定银行卡</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num"><span>5</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step-name">设置密码</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num"><span>6</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step-name">申请成功</div>
+    </div>
+  </div>
+</div>
+
+<div class="page-content">
+
+  <!-- 安全提示 -->
+  <div class="security-tip">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+      <path d="M8 1.5L2.5 4v4.5c0 2.5 1.75 4.8 4 5.5 2.25-.7 4-3 4-5.5V4L8 1.5z" fill="#165DFF" stroke="#165DFF" stroke-width="1.2" stroke-linejoin="round" opacity="0.15"/>
+      <path d="M5.5 8l2 2 3-3" stroke="#165DFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="security-tip-text">
+      此银行卡将用于<strong>提现</strong>，需与实名姓名一致，仅支持借记卡
+    </div>
+  </div>
+
+  <!-- 银行卡信息 -->
+  <div class="bank-card">
+    <div class="bank-card-header">
+      <div class="bank-card-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <rect x="1.5" y="3.5" width="15" height="11" rx="1.5" stroke="#FF7D00" stroke-width="1.2"/>
+          <path d="M1.5 7h15" stroke="#FF7D00" stroke-width="1.2"/>
+          <rect x="3.5" y="10" width="4" height="2" rx="0.5" fill="#FF7D00"/>
+        </svg>
+      </div>
+      <span class="bank-card-title">绑定提现银行卡</span>
+    </div>
+    <div class="bank-card-body">
+      <!-- 卡号输入 -->
+      <div class="card-input-wrap">
+        <div class="card-input-row" id="cardRow">
+          <input class="card-input" id="cardInput" type="tel"
+            placeholder="请输入银行卡号" maxlength="23"
+            oninput="onCardInput(this)" autocomplete="off"/>
+        </div>
+      </div>
+      
+      <!-- 银行识别结果 -->
+      <div class="bank-info hidden" id="bankInfo">
+        <div class="bank-logo" id="bankLogo">工</div>
+        <div class="bank-detail">
+          <div class="bank-name" id="bankName">中国工商银行</div>
+          <div class="bank-type" id="bankType">储蓄卡</div>
+        </div>
+        <div class="bank-status">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="7" r="6.5" fill="#E8FFEA" stroke="#00B42A"/>
+            <path d="M4 7l2 2 4-4" stroke="#00B42A" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          验证通过
+        </div>
+      </div>
+
+      <!-- 分隔线 -->
+      <div class="section-divider"></div>
+      
+      <!-- 手机号显示 -->
+      <div class="phone-display">
+        <div>
+          <div class="phone-label">银行预留手机号</div>
+          <div class="phone-number" id="phoneNumber">138****8888</div>
+        </div>
+        <span class="phone-edit" onclick="editPhone()">更换</span>
+      </div>
+      
+      <!-- 验证码输入 -->
+      <div class="code-label">短信验证码 <span class="code-required">*</span></div>
+      <div class="code-input-row" id="codeRow">
+        <input class="code-input" id="codeInput" type="tel"
+          placeholder="请输入6位验证码" maxlength="6"
+          oninput="onCodeInput(this)" autocomplete="one-time-code"/>
+        <button class="btn-sms" id="btnSms" onclick="sendSms()">获取验证码</button>
+      </div>
+      <div class="code-error" id="codeError" style="display:none;">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <circle cx="6" cy="6" r="5.5" stroke="#F53F3F"/>
+          <path d="M6 3.5v3M6 8.5h.01" stroke="#F53F3F" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        <span id="codeErrorText">验证码错误</span>
+      </div>
+      <div class="code-hint" id="codeHint" style="display:none;">
+        验证码已发送至 138****8888
+      </div>
+    </div>
+  </div>
+
+  <div style="height:16px;"></div>
+</div>
+
+<!-- 底部按钮 -->
+<div class="bottom-bar">
+  <button class="btn-primary" id="btnBind" disabled onclick="handleBind()">
+    确认绑定
+  </button>
+</div>
+
+<!-- 更换手机号弹窗 -->
+<div class="modal-overlay" id="phoneModal" onclick="closePhoneModal(event)">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title">更换银行预留手机号</span>
+      <button class="modal-close" onclick="closePhoneModal()">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-input-wrap">
+      <div class="modal-input-label">新手机号</div>
+      <input class="modal-input" id="newPhoneInput" type="tel" placeholder="请输入新的银行预留手机号" maxlength="11" oninput="onNewPhoneInput(this)"/>
+    </div>
+    <button class="modal-btn" id="btnConfirmPhone" disabled onclick="confirmChangePhone()">确认更换</button>
+  </div>
+</div>
+
+<script>
+function showToast(msg,d=2200){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),d);
+}
+
+/* 银行识别模拟 */
+const bankMap={'62220':'中国工商银行','62270':'中国建设银行','62284':'中国农业银行',
+  '62301':'中国银行','62315':'招商银行','62349':'交通银行','62358':'浦发银行'};
+
+function onCardInput(el){
+  el.value=el.value.replace(/\D/g,'').slice(0,19).replace(/(\d{4})(?=\d)/g,'$1 ');
+  const raw=el.value.replace(/\s/g,'');
+  
+  // 银行识别
+  const prefix=raw.slice(0,5);
+  const bankInfo=document.getElementById('bankInfo');
+  const bank=bankMap[prefix];
+  if(bank&&raw.length>=10){
+    bankInfo.classList.remove('hidden');
+    document.getElementById('bankName').textContent=bank;
+    document.getElementById('bankLogo').textContent=bank[2]||'行';
+  }else{
+    bankInfo.classList.add('hidden');
+  }
+  updateBind();
+}
+
+let countdown=0,smsTimer=null;
+
+function onCodeInput(el){
+  el.value=el.value.replace(/\D/g,'');
+  document.getElementById('codeError').style.display='none';
+  document.getElementById('codeRow').classList.remove('has-error');
+  updateBind();
+}
+
+function sendSms(){
+  const phone='138****8888';
+  countdown=60;clearInterval(smsTimer);
+  document.getElementById('btnSms').disabled=true;
+  document.getElementById('codeHint').style.display='block';
+  smsTimer=setInterval(()=>{
+    countdown--;
+    document.getElementById('btnSms').textContent=countdown+'s';
+    if(countdown<=0){clearInterval(smsTimer);countdown=0;
+      document.getElementById('btnSms').textContent='重新获取';
+      document.getElementById('btnSms').disabled=false;}
+  },1000);
+  document.getElementById('btnSms').textContent='60s';
+  showToast('验证码已发送');
+  document.getElementById('codeInput').focus();
+}
+
+let currentPhone = '138****8888';
+
+function editPhone(){
+  document.getElementById('phoneModal').classList.add('show');
+  document.getElementById('newPhoneInput').value = '';
+  document.getElementById('newPhoneInput').focus();
+  updateConfirmBtn();
+}
+
+function closePhoneModal(e){
+  if (!e || e.target === document.getElementById('phoneModal')) {
+    document.getElementById('phoneModal').classList.remove('show');
+  }
+}
+
+function onNewPhoneInput(el){
+  el.value = el.value.replace(/\D/g, '').slice(0, 11);
+  updateConfirmBtn();
+}
+
+function updateConfirmBtn(){
+  const phone = document.getElementById('newPhoneInput').value;
+  document.getElementById('btnConfirmPhone').disabled = phone.length !== 11;
+}
+
+function confirmChangePhone(){
+  const newPhone = document.getElementById('newPhoneInput').value;
+  // 隐藏手机号中间4位
+  const masked = newPhone.slice(0, 3) + '****' + newPhone.slice(7);
+  currentPhone = masked;
+  document.getElementById('phoneNumber').textContent = masked;
+  document.getElementById('codeHint').textContent = '验证码已发送至 ' + masked;
+  closePhoneModal();
+  showToast('手机号更换成功');
+}
+
+function updateBind(){
+  const card=document.getElementById('cardInput').value.replace(/\s/g,'');
+  const code=document.getElementById('codeInput').value;
+  const bankValid=!document.getElementById('bankInfo').classList.contains('hidden');
+  // 与实名一致只做展示提醒，不做强制校验
+  document.getElementById('btnBind').disabled=!(card.length>=16&&code.length===6&&bankValid);
+}
+
+function handleBind(){
+  const code=document.getElementById('codeInput').value;
+  if(code!=='123456'){
+    document.getElementById('codeError').style.display='flex';
+    document.getElementById('codeErrorText').textContent='验证码错误（演示请输入 123456）';
+    document.getElementById('codeRow').classList.add('has-error');
+    return;
+  }
+  const btn=document.getElementById('btnBind');
+  btn.classList.add('loading');
+  btn.textContent='绑定中';
+  setTimeout(()=>{window.location.href='yinsheng-security-setup.html';},1800);
+}
+</script>
+</body>
+</html>

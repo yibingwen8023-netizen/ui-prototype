@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>银盛钱包 · 审核未通过</title>
+  <style>
+    /* ===== 设计令牌（与登录页同源） ===== */
+    :root {
+      --color-primary:        #165DFF;
+      --color-primary-light:  #4080FF;
+      --color-primary-bg:     #EEF3FF;
+      --color-primary-dark:   #0E3EB5;
+      --color-primary-pale:   #D6E4FF;
+
+      --color-success:        #00B42A;
+      --color-success-bg:     #E8FFEA;
+      --color-error:          #F53F3F;
+      --color-error-bg:       #FFECE8;
+      --color-warning:        #FF7D00;
+      --color-warning-bg:     #FFF3E8;
+
+      --color-text-primary:   #1D2129;
+      --color-text-secondary: #4E5969;
+      --color-text-placeholder: #86909C;
+      --color-text-disabled:  #C9CDD4;
+
+      --color-border:         #E5E6EB;
+      --color-bg:             #F2F3F5;
+      --color-card:           #FFFFFF;
+
+      --radius-sm:   6px;
+      --radius-md:   10px;
+      --radius-lg:   16px;
+      --radius-xl:   24px;
+      --radius-full: 9999px;
+
+      --shadow-card: 0 4px 20px 0 rgba(0,0,0,0.08), 0 1px 4px 0 rgba(0,0,0,0.04);
+
+      --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ===== Reset ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(160deg, #FFF5F5 0%, #F2F3F5 55%, #FFFFFF 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      outline: none;
+      border: none;
+      width: 100vw;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ===== 步骤条 ===== */
+    .step-bar {
+      background: #fff;
+      padding: 20px 16px 16px;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .step-list {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      position: relative;
+    }
+    .step-list::before {
+      content: '';
+      position: absolute;
+      top: 14px;
+      left: 28px;
+      right: 28px;
+      height: 2px;
+      background: #E5E6EB;
+      z-index: 0;
+    }
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      z-index: 1;
+      flex: 1;
+    }
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      background: #E5E6EB;
+      color: #86909C;
+      transition: all var(--transition);
+    }
+    .step-item.active .step-num {
+      background: var(--color-error);
+      color: #fff;
+    }
+    .step-item.done .step-num {
+      background: var(--color-primary);
+      color: #fff;
+    }
+    .step-item.done .step-num svg { display: block; }
+    .step-item.done .step-num span { display: none; }
+    .step-item.active .step-num svg { display: none; }
+    .step-name {
+      font-size: 11px;
+      color: var(--color-text-secondary);
+      white-space: nowrap;
+    }
+    .step-item.active .step-name {
+      color: var(--color-error);
+      font-weight: 500;
+    }
+    .step-item.done .step-name {
+      color: var(--color-primary);
+    }
+
+    /* ===== 主内容区 ===== */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 24px;
+    }
+
+    /* ===== 失败图标 ===== */
+    /* 失败图标 - 统一呼吸动画 */
+    .reject-stage {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      margin-bottom: 24px;
+    }
+    .reject-pulse {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid rgba(245, 63, 63, 0.25);
+      animation: pulse-out 2.4s ease-out infinite;
+    }
+    .reject-pulse:nth-child(2) { animation-delay: 0.8s; }
+    .reject-pulse:nth-child(3) { animation-delay: 1.6s; }
+    @keyframes pulse-out {
+      0% { transform: scale(0.85); opacity: 0.8; }
+      100% { transform: scale(1.4); opacity: 0; }
+    }
+    .reject-icon {
+      position: absolute;
+      inset: 10px;
+      background: linear-gradient(135deg, #F53F3F, #FF6B6B);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 32px rgba(245, 63, 63, 0.4);
+    }
+    .reject-icon svg {
+      width: 56px;
+      height: 56px;
+      color: white;
+    }
+
+    /* ===== 标题与状态 ===== */
+    .reject-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 8px;
+    }
+    .reject-subtitle {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      margin-bottom: 32px;
+    }
+
+    /* ===== 拒绝原因卡片 ===== */
+    .reject-card {
+      width: 100%;
+      max-width: 400px;
+      background: #fff;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      border: 1px solid var(--color-error-bg);
+    }
+    .reject-header {
+      background: linear-gradient(135deg, var(--color-error-bg) 0%, #FFF5F5 100%);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--color-error-bg);
+    }
+    .reject-header-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--color-error);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .reject-header-icon svg {
+      width: 18px;
+      height: 18px;
+      color: #fff;
+    }
+    .reject-header-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--color-error);
+    }
+    .reject-body {
+      padding: 20px;
+    }
+    .reject-reason-text {
+      font-size: 14px;
+      color: var(--color-text-primary);
+      line-height: 1.8;
+    }
+
+    /* ===== 审核信息 ===== */
+    .audit-info {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px dashed var(--color-border);
+    }
+    .audit-info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .audit-info-row:last-child {
+      margin-bottom: 0;
+    }
+    .audit-info-label {
+      color: var(--color-text-placeholder);
+    }
+    .audit-info-value {
+      color: var(--color-text-secondary);
+    }
+
+
+  </style>
+</head>
+<body>
+  <!-- 步骤条 -->
+  <div class="step-bar">
+    <div class="step-list">
+      <div class="step-item done">
+        <div class="step-num"><span>1</span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="step-name">填写资料</div>
+      </div>
+      <div class="step-item active">
+        <div class="step-num"><span>2</span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="step-name">银盛审核</div>
+      </div>
+    <div class="step-item">
+      <div class="step-num">3</div>
+      <div class="step-name">签约确认</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">4</div>
+      <div class="step-name">绑定银行卡</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">5</div>
+      <div class="step-name">设置密码</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">6</div>
+      <div class="step-name">申请成功</div>
+    </div>
+    </div>
+  </div>
+
+  <!-- 主内容 -->
+  <main class="main">
+    <!-- 失败图标 -->
+    <div class="reject-stage">
+      <div class="reject-pulse"></div>
+      <div class="reject-pulse"></div>
+      <div class="reject-pulse"></div>
+      <div class="reject-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="reject-title">审核未通过</div>
+    <div class="reject-subtitle">您的入驻申请未能通过审核</div>
+
+    <!-- 拒绝原因 -->
+    <div class="reject-card">
+      <div class="reject-header">
+        <div class="reject-header-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+        <div class="reject-header-title">拒绝原因</div>
+      </div>
+      <div class="reject-body">
+        <div class="reject-reason-text">
+          上传的身份证人像面照片模糊，无法识别关键信息。请确保照片清晰、四角完整、无反光遮挡。您上传的身份证有效期已过期，请使用有效期内的身份证件重新申请。填写的姓名与身份证上的姓名不一致，请核对后重新填写。
+        </div>
+
+        <!-- 审核信息 -->
+        <div class="audit-info">
+          <div class="audit-info-row">
+            <span class="audit-info-label">申请编号</span>
+            <span class="audit-info-value">YS202503270001</span>
+          </div>
+          <div class="audit-info-row">
+            <span class="audit-info-label">审核时间</span>
+            <span class="audit-info-value">2026-03-27 14:32:18</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>银盛钱包 · 签约审核中</title>
+  <style>
+    /* ===== 设计令牌（与登录页同源） ===== */
+    :root {
+      --color-primary:        #165DFF;
+      --color-primary-light:  #4080FF;
+      --color-primary-bg:     #EEF3FF;
+      --color-primary-dark:   #0E3EB5;
+      --color-primary-pale:   #D6E4FF;
+
+      --color-success:        #00B42A;
+      --color-success-bg:     #E8FFEA;
+      --color-error:          #F53F3F;
+      --color-error-bg:       #FFECE8;
+      --color-warning:        #FF7D00;
+      --color-warning-bg:     #FFF3E8;
+
+      --color-text-primary:   #1D2129;
+      --color-text-secondary: #4E5969;
+      --color-text-placeholder: #86909C;
+      --color-text-disabled:  #C9CDD4;
+
+      --color-border:         #E5E6EB;
+      --color-bg:             #F2F3F5;
+      --color-card:           #FFFFFF;
+
+      --radius-sm:   6px;
+      --radius-md:   10px;
+      --radius-lg:   16px;
+      --radius-xl:   24px;
+      --radius-full: 9999px;
+
+      --shadow-card: 0 4px 20px 0 rgba(0,0,0,0.08), 0 1px 4px 0 rgba(0,0,0,0.04);
+
+      --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ===== Reset ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(160deg, #EEF3FF 0%, #F2F3F5 55%, #FFFFFF 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      outline: none;
+      border: none;
+      width: 100vw;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ===== 步骤条 ===== */
+    .step-bar {
+      background: #fff;
+      padding: 20px 16px 16px;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .step-list {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      position: relative;
+    }
+    .step-list::before {
+      content: '';
+      position: absolute;
+      top: 14px;
+      left: 28px;
+      right: 28px;
+      height: 2px;
+      background: #E5E6EB;
+      z-index: 0;
+    }
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      z-index: 1;
+      flex: 1;
+    }
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      background: #E5E6EB;
+      color: #86909C;
+      transition: all var(--transition);
+    }
+    .step-item.active .step-num {
+      background: var(--color-primary);
+      color: #fff;
+    }
+    .step-item.done .step-num {
+      background: var(--color-primary);
+      color: #fff;
+    }
+    .step-num svg {
+      display: none;
+    }
+    .step-item.done .step-num span {
+      display: none;
+    }
+    .step-item.done .step-num svg {
+      display: block;
+    }
+    .step-name {
+      font-size: 12px;
+      color: #86909C;
+      white-space: nowrap;
+    }
+    .step-item.active .step-name {
+      color: var(--color-primary);
+      font-weight: 500;
+    }
+    .step-item.done .step-name {
+      color: var(--color-primary);
+    }
+
+    /* ===== 主体 ===== */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px 48px;
+      position: relative;
+    }
+
+    /* 背景装饰圆 */
+    .bg-circle {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .bg-circle-1 {
+      width: 320px; height: 320px;
+      top: -60px; left: 50%;
+      transform: translateX(-50%);
+      background: radial-gradient(circle, rgba(22,93,255,0.06) 0%, transparent 70%);
+    }
+    .bg-circle-2 {
+      width: 200px; height: 200px;
+      bottom: 40px; right: -40px;
+      background: radial-gradient(circle, rgba(22,93,255,0.04) 0%, transparent 70%);
+    }
+
+    /* ===== 内容卡片 ===== */
+    .content-card {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 400px;
+      background: var(--color-card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      border: 1px solid rgba(229,230,235,0.6);
+      padding: 40px 28px 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0;
+    }
+
+    /* ===== 动画图标区 ===== */
+    .icon-stage {
+      width: 120px;
+      height: 120px;
+      position: relative;
+      margin-bottom: 28px;
+    }
+
+    /* 外圈脉冲 - 统一呼吸动画 */
+    .pulse-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid rgba(22,93,255,0.25);
+      animation: pulse-out 2.4s ease-out infinite;
+    }
+    .pulse-ring:nth-child(2) { animation-delay: 0.8s; }
+    .pulse-ring:nth-child(3) { animation-delay: 1.6s; }
+
+    @keyframes pulse-out {
+      0%   { transform: scale(0.85); opacity: 0.8; }
+      100% { transform: scale(1.4);  opacity: 0; }
+    }
+
+    /* 主圆背景 */
+    .icon-bg {
+      position: absolute;
+      inset: 10px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #165DFF, #4080FF);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 32px rgba(22,93,255,0.4);
+    }
+
+    /* 旋转外圈弧 */
+    .spin-arc {
+      position: absolute;
+      inset: 10px;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      border-top-color: rgba(255,255,255,0.8);
+      border-right-color: rgba(255,255,255,0.3);
+      animation: spin 1.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* 中央盾牌 */
+    .shield-icon {
+      width: 56px;
+      height: 56px;
+      color: white;
+    }
+
+    /* 成功/失败状态图标 */
+    .icon-success, .icon-fail {
+      position: absolute;
+      inset: 12px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .icon-success {
+      background: linear-gradient(135deg, #E8FFEA, #B7F5C2);
+    }
+    .icon-fail {
+      background: linear-gradient(135deg, #FFECE8, #FFD0C7);
+    }
+    .icon-success.show, .icon-fail.show {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* ===== 文案区 ===== */
+    .main-text {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      line-height: 1.4;
+      margin-bottom: 10px;
+      letter-spacing: 0.3px;
+    }
+    .sub-text {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    /* 计时器 */
+    .timer-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--color-primary-bg);
+      border: 1px solid var(--color-primary-pale);
+      border-radius: var(--radius-full);
+      padding: 6px 16px;
+      margin-bottom: 24px;
+    }
+    .timer-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      animation: blink 1.2s ease-in-out infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+    .timer-label {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+    }
+    .timer-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-primary);
+      font-variant-numeric: tabular-nums;
+      min-width: 52px;
+    }
+
+    /* ===== 步骤进度 ===== */
+    .steps {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-bottom: 28px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+    }
+    .progress-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 16px;
+      background: #FAFBFC;
+      border-bottom: 1px solid var(--color-border);
+      transition: background var(--transition);
+    }
+    .progress-item:last-child { border-bottom: none; }
+    .progress-item.active { background: var(--color-primary-bg); }
+    .progress-item.done   { background: #F0FFF4; }
+    .progress-item.fail   { background: #FFF0F0; }
+    .progress-item.fail .progress-dot { background: var(--color-error); color: white; }
+    .progress-item.fail .progress-name { color: var(--color-error); }
+
+    .progress-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      background: var(--color-border);
+      color: var(--color-text-placeholder);
+      transition: all var(--transition);
+    }
+    .progress-item.active .progress-dot {
+      background: var(--color-primary);
+      color: white;
+      box-shadow: 0 2px 8px rgba(22,93,255,0.35);
+      animation: step-pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes step-pulse {
+      0%, 100% { box-shadow: 0 2px 8px rgba(22,93,255,0.35); }
+      50%       { box-shadow: 0 2px 16px rgba(22,93,255,0.55); }
+    }
+    .progress-item.done .progress-dot {
+      background: var(--color-success);
+      color: white;
+    }
+    .progress-info { flex: 1; text-align: left; }
+    .progress-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-text-primary);
+      line-height: 1;
+      margin-bottom: 3px;
+    }
+    .progress-item.active .progress-name { color: var(--color-primary); }
+    .progress-desc {
+      font-size: 12px;
+      color: var(--color-text-placeholder);
+    }
+    .step-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-weight: 500;
+    }
+    .step-tag.pending  { background: var(--color-bg); color: var(--color-text-placeholder); }
+    .step-tag.running  { background: var(--color-primary-bg); color: var(--color-primary); }
+    .step-tag.done     { background: var(--color-success-bg); color: var(--color-success); }
+    .step-tag.fail     { background: var(--color-error-bg); color: var(--color-error); }
+
+    /* ===== 轮询状态栏 ===== */
+    .poll-bar {
+      width: 100%;
+      height: 3px;
+      background: var(--color-border);
+      border-radius: var(--radius-full);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .poll-progress {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+      border-radius: var(--radius-full);
+      width: 0%;
+      transition: width 0.3s linear;
+    }
+    .poll-hint {
+      font-size: 12px;
+      color: var(--color-text-placeholder);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .poll-hint .dot-loading span {
+      display: inline-block;
+      width: 4px; height: 4px;
+      background: var(--color-text-placeholder);
+      border-radius: 50%;
+      margin: 0 1px;
+      animation: dot-bounce 1.2s ease-in-out infinite;
+    }
+    .dot-loading span:nth-child(2) { animation-delay: 0.2s; }
+    .dot-loading span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dot-bounce {
+      0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+      40%            { transform: translateY(-4px); opacity: 1; }
+    }
+
+    /* ===== 按钮区 ===== */
+    .btn-group {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn-refresh {
+      width: 100%;
+      height: 48px;
+      border: 1.5px solid var(--color-primary);
+      border-radius: var(--radius-full);
+      background: transparent;
+      color: var(--color-primary);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all var(--transition);
+      letter-spacing: 0.5px;
+    }
+    .btn-refresh:hover { background: var(--color-primary-bg); }
+    .btn-refresh:active { transform: scale(0.98); }
+    .btn-refresh.spinning svg { animation: spin 0.8s linear infinite; }
+
+    /* 重新提交按钮 */
+    .btn-reapply {
+      width: 100%;
+      height: 48px;
+      border: none;
+      border-radius: var(--radius-full);
+      background: linear-gradient(90deg, #165DFF, #4080FF);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all var(--transition);
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 12px rgba(22,93,255,0.3);
+    }
+    .btn-reapply:hover { filter: brightness(1.05); }
+    .btn-reapply:active { transform: scale(0.98); }
+
+    /* 审核失败原因 */
+    .fail-reason {
+      width: 100%;
+      background: #FFF0F0;
+      border: 1px solid #FFD4D4;
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .fail-reason-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-error);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .fail-reason-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .fail-reason-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+    .fail-reason-item::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-error);
+      margin-top: 6px;
+      flex-shrink: 0;
+    }
+
+    /* ===== Toast ===== */
+    .toast {
+      position: fixed;
+      top: 72px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: rgba(29,33,41,0.88);
+      color: #FFF;
+      font-size: 14px;
+      padding: 10px 20px;
+      border-radius: var(--radius-full);
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 999;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ===== 结果遮罩 ===== */
+    .result-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(29,33,41,0.45);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s;
+    }
+    .result-overlay.show { opacity: 1; pointer-events: auto; }
+    .result-modal {
+      background: var(--color-card);
+      border-radius: var(--radius-lg);
+      padding: 36px 32px 28px;
+      width: min(340px, calc(100vw - 48px));
+      text-align: center;
+      transform: translateY(20px) scale(0.96);
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .result-overlay.show .result-modal { transform: translateY(0) scale(1); }
+    .result-modal-icon {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .result-modal-icon.success { background: var(--color-success-bg); }
+    .result-modal-icon.fail    { background: var(--color-error-bg); }
+    .result-modal-title {
+      font-size: 18px; font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 8px;
+    }
+    .result-modal-desc {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .result-modal-btn {
+      width: 100%;
+      height: 48px;
+      border: none;
+      border-radius: var(--radius-full);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      color: white;
+      transition: all var(--transition);
+    }
+    .result-modal-btn.success { background: linear-gradient(90deg, #165DFF, #4080FF); box-shadow: 0 4px 12px rgba(22,93,255,0.3); }
+    .result-modal-btn.fail    { background: linear-gradient(90deg, #F53F3F, #FF6B6B); box-shadow: 0 4px 12px rgba(245,63,63,0.3); }
+    .result-modal-btn:hover { filter: brightness(1.05); }
+
+    /* ===== 底部安全提示 ===== */
+    .security-footer {
+      margin-top: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--color-text-disabled);
+    }
+
+    @media (max-width: 400px) {
+      .content-card { padding: 32px 20px 28px; }
+      .main-text { font-size: 17px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- 结果弹窗 -->
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-modal" id="resultModal">
+    <div class="result-modal-icon" id="resultIcon">
+      <!-- 图标由 JS 动态填充 -->
+    </div>
+    <div class="result-modal-title" id="resultTitle"></div>
+    <div class="result-modal-desc" id="resultDesc"></div>
+    <button class="result-modal-btn" id="resultBtn" onclick="handleResultAction()"></button>
+  </div>
+</div>
+
+<!-- 步骤条 -->
+<div class="step-bar">
+  <div class="step-list">
+    <div class="step-item done">
+      <div class="step-num"><span>1</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step-name">填写资料</div>
+    </div>
+    <div class="step-item active">
+      <div class="step-num"><span>2</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step-name">银盛审核</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">3</div>
+      <div class="step-name">签约确认</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">4</div>
+      <div class="step-name">绑定银行卡</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">5</div>
+      <div class="step-name">设置密码</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">6</div>
+      <div class="step-name">申请成功</div>
+    </div>
+  </div>
+</div>
+
+<!-- 主体 -->
+<main class="main">
+  <div class="bg-circle bg-circle-1"></div>
+  <div class="bg-circle bg-circle-2"></div>
+
+  <div class="content-card">
+
+    <!-- 动画图标 -->
+    <div class="icon-stage">
+      <!-- 脉冲外圈 -->
+      <div class="pulse-ring"></div>
+      <div class="pulse-ring"></div>
+      <div class="pulse-ring"></div>
+
+      <!-- 旋转弧 -->
+      <div class="spin-arc" id="spinArc"></div>
+
+      <!-- 主背景圆 + 盾牌 -->
+      <div class="icon-bg">
+        <svg class="shield-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+
+      <!-- 成功叠层 -->
+      <div class="icon-success" id="iconSuccess">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+          <path d="M8 18l7 7L28 12" stroke="#00B42A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+
+      <!-- 失败叠层 -->
+      <div class="icon-fail" id="iconFail">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+          <path d="M11 11l14 14M25 11L11 25" stroke="#F53F3F" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 主文案 -->
+    <div class="main-text" id="mainText">银盛正在为您审核签约信息</div>
+    <div class="sub-text" id="subText">预估需要 30 分钟，请耐心等待<br/>审核完成后将以短信通知您</div>
+
+    <!-- 计时器 -->
+    <div class="timer-wrap" id="timerWrap">
+      <div class="timer-dot" id="timerDot"></div>
+      <span class="timer-label">已等待：</span>
+      <span class="timer-value" id="timerValue">00分00秒</span>
+    </div>
+
+    <!-- 步骤进度 -->
+    <div class="steps">
+      <div class="progress-item done" id="step1">
+        <div class="progress-dot">✓</div>
+        <div class="progress-info">
+          <div class="progress-name">信息提交</div>
+          <div class="progress-desc">签约资料已提交</div>
+        </div>
+        <span class="step-tag done">已完成</span>
+      </div>
+      <div class="progress-item active" id="step2">
+        <div class="progress-dot">2</div>
+        <div class="progress-info">
+          <div class="progress-name">后台审核</div>
+          <div class="progress-desc">银盛正在核验您的信息</div>
+        </div>
+        <span class="step-tag running">进行中</span>
+      </div>
+      <div class="progress-item" id="step3">
+        <div class="progress-dot">3</div>
+        <div class="progress-info">
+          <div class="progress-name">签约确认</div>
+          <div class="progress-desc">等待审核通过</div>
+        </div>
+        <span class="step-tag pending">待处理</span>
+      </div>
+    </div>
+
+    <!-- 状态提示 -->
+    <div class="poll-hint" style="justify-content: center; margin-bottom: 20px;">
+      <span id="pollHintText">请点击下方按钮手动刷新状态</span>
+    </div>
+
+    <!-- 审核失败原因 -->
+    <div class="fail-reason" id="failReason" style="display:none;">
+      <div class="fail-reason-title">审核未通过原因</div>
+      <div class="fail-reason-list" id="failReasonList">
+        <!-- 动态填充失败原因 -->
+      </div>
+    </div>
+
+    <!-- 按钮 -->
+    <div class="btn-group" id="btnGroup">
+      <button class="btn-refresh" id="btnRefresh" onclick="manualRefresh()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" id="refreshIcon">
+          <path d="M13.6 2.4A7 7 0 1 0 14.9 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M11 2l3 1-1 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        刷新状态
+      </button>
+      <button class="btn-reapply" id="btnReapply" onclick="goToReapply()" style="display:none;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        重新提交资料
+      </button>
+    </div>
+
+  </div>
+
+  <!-- 底部安全提示 -->
+  <div class="security-footer">
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+      <path d="M6.5 1L2 3v3.5c0 2.76 1.93 5.34 4.5 6 2.57-.66 4.5-3.24 4.5-6V3L6.5 1z"
+        stroke="#C9CDD4" stroke-width="1.2" stroke-linejoin="round" fill="none"/>
+      <path d="M4.5 6.5l1.5 1.5 2.5-2.5" stroke="#C9CDD4" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    数据传输已加密 · 审核信息严格保密
+  </div>
+</main>
+
+<script>
+  /* ============================================================
+     状态
+  ============================================================ */
+  let elapsedSeconds  = 0;
+  let pollSeconds     = 0;
+  const POLL_INTERVAL = 10;    // 轮询间隔秒
+  let timerHandle     = null;
+  let pollHandle      = null;
+  let resultType      = null;  // 'success' | 'fail' | null
+
+  /* ============================================================
+     DOM
+  ============================================================ */
+  const timerValue  = document.getElementById('timerValue');
+  const pollProg    = document.getElementById('pollProgress');
+  const pollHint    = document.getElementById('pollHintText');
+  const btnRefresh  = document.getElementById('btnRefresh');
+  const spinArc     = document.getElementById('spinArc');
+
+  /* ============================================================
+     计时器
+  ============================================================ */
+  function padTwo(n) { return String(n).padStart(2, '0'); }
+
+  function formatTime(s) {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${padTwo(m)}分${padTwo(sec)}秒`;
+  }
+
+  function startTimer() {
+    timerHandle = setInterval(() => {
+      if (resultType) return;
+      elapsedSeconds++;
+      timerValue.textContent = formatTime(elapsedSeconds);
+    }, 1000);
+  }
+
+  /* ============================================================
+     轮询进度条
+  ============================================================ */
+  function startPolling() {
+    pollSeconds = 0;
+    updatePollBar();
+
+    pollHandle = setInterval(() => {
+      if (resultType) return;
+      pollSeconds++;
+      updatePollBar();
+
+      if (pollSeconds >= POLL_INTERVAL) {
+        pollSeconds = 0;
+        doPolling();
+      }
+    }, 1000);
+  }
+
+  function updatePollBar() {
+    const pct = (pollSeconds / POLL_INTERVAL) * 100;
+    pollProg.style.width = pct + '%';
+    const remaining = POLL_INTERVAL - pollSeconds;
+    if (remaining > 0) {
+      pollHint.textContent = `${remaining} 秒后自动刷新状态`;
+    }
+  }
+
+  /* ============================================================
+     轮询请求（模拟）
+  ============================================================ */
+  function doPolling(isManual = false) {
+    if (resultType) return;
+    pollHint.textContent = isManual ? '正在查询最新状态…' : '正在自动刷新…';
+
+    // 模拟网络请求延迟
+    setTimeout(() => {
+      if (resultType) return;
+      pollHint.textContent = `${POLL_INTERVAL} 秒后自动刷新状态`;
+      if (isManual) showToast('✓ 状态已刷新，审核仍在进行中');
+    }, 800);
+  }
+
+  /* ============================================================
+     手动刷新
+  ============================================================ */
+  function manualRefresh() {
+    if (resultType) return;
+    btnRefresh.classList.add('spinning');
+    setTimeout(() => btnRefresh.classList.remove('spinning'), 1000);
+    pollSeconds = 0;
+    updatePollBar();
+    doPolling(true);
+  }
+
+  /* ============================================================
+     模拟结果（演示专用）
+  ============================================================ */
+  // 审核失败原因示例
+  const failReasons = [
+    '身份证照片不清晰，请重新上传',
+    '银行卡信息与实名认证姓名不一致',
+    '预留手机号无法接收短信验证码'
+  ];
+
+  function simulateResult(type) {
+    if (resultType) return;
+    resultType = type;
+
+    // 停止动画
+    spinArc.style.animation = 'none';
+    document.getElementById('timerDot').style.animation = 'none';
+
+    if (type === 'success') {
+      // 审核通过直接跳转到签约确认页
+      window.location.href = 'yinsheng-signing-confirm.html';
+    } else {
+      document.getElementById('iconFail').classList.add('show');
+      document.getElementById('mainText').textContent = '审核未通过';
+      document.getElementById('subText').textContent  = '您的签约信息存在问题，请查看详情后重新提交';
+      
+      // 更新步骤状态为失败
+      document.getElementById('step2').classList.remove('active');
+      document.getElementById('step2').classList.add('fail');
+      document.getElementById('step2').querySelector('.step-tag').textContent = '已失败';
+      document.getElementById('step2').querySelector('.step-tag').classList.remove('running');
+      document.getElementById('step2').querySelector('.step-tag').classList.add('fail');
+      
+      // 显示失败原因
+      const failReasonDiv = document.getElementById('failReason');
+      const failReasonList = document.getElementById('failReasonList');
+      failReasonList.innerHTML = failReasons.map(reason => `<div class="fail-reason-item">${reason}</div>`).join('');
+      failReasonDiv.style.display = 'block';
+      
+      // 隐藏刷新按钮，显示重新提交按钮
+      document.getElementById('btnRefresh').style.display = 'none';
+      document.getElementById('btnReapply').style.display = 'flex';
+      
+      // 隐藏轮询相关元素
+      document.getElementById('timerWrap').style.display = 'none';
+      document.querySelector('.poll-bar').style.display = 'none';
+      document.querySelector('.poll-hint').style.display = 'none';
+    }
+  }
+  
+  function goToReapply() {
+    // 获取入驻类型参数或个人/商户标识
+    const accountType = sessionStorage.getItem('accountType') || 'personal';
+    if (accountType === 'merchant') {
+      window.location.href = 'yinsheng-merchant-apply.html';
+    } else {
+      window.location.href = 'yinsheng-onboarding-apply.html';
+    }
+  }
+
+  /* ============================================================
+     结果弹窗
+  ============================================================ */
+  function showResultModal(type) {
+    const overlay   = document.getElementById('resultOverlay');
+    const icon      = document.getElementById('resultIcon');
+    const title     = document.getElementById('resultTitle');
+    const desc      = document.getElementById('resultDesc');
+    const btn       = document.getElementById('resultBtn');
+
+    icon.className = `result-modal-icon ${type}`;
+    btn.className  = `result-modal-btn ${type}`;
+
+    if (type === 'success') {
+      icon.innerHTML = `<svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+        <path d="M8 18l7 7L28 12" stroke="#00B42A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`;
+      title.textContent = '🎉 签约审核通过';
+      desc.textContent  = '银盛审核已完成，正在为您跳转至签约确认页…';
+      btn.textContent   = '前往签约确认 →';
+    } else {
+      icon.innerHTML = `<svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+        <path d="M11 11l14 14M25 11L11 25" stroke="#F53F3F" stroke-width="3" stroke-linecap="round"/>
+      </svg>`;
+      title.textContent = '审核未通过';
+      desc.textContent  = '您的签约信息存在问题，请查看失败原因并重新提交。';
+      btn.textContent   = '查看失败原因 →';
+    }
+
+    overlay.classList.add('show');
+  }
+
+  function handleResultAction() {
+    closeResultAndRedirect(resultType === 'success' ? 'signing' : 'fail');
+  }
+
+  function closeResultAndRedirect(dest) {
+    document.getElementById('resultOverlay').classList.remove('show');
+    showToast(dest === 'signing' ? '正在跳转签约确认页…' : '正在跳转审核失败页…');
+    setTimeout(() => {
+      showToast(dest === 'signing'
+        ? '【演示】已到达「签约确认页」'
+        : '【演示】已到达「审核失败页」', 3000);
+    }, 1200);
+  }
+
+  /* ============================================================
+     返回首页
+  ============================================================ */
+  function handleBackHome() {
+    showToast('已转入后台运行，完成后将推送通知');
+  }
+
+  /* ============================================================
+     重置演示
+  ============================================================ */
+  function resetDemo() {
+    resultType     = null;
+    elapsedSeconds = 0;
+    pollSeconds    = 0;
+    timerValue.textContent = '00分00秒';
+
+    spinArc.style.animation      = '';
+    document.getElementById('timerDot').style.animation = '';
+    document.getElementById('iconSuccess').classList.remove('show');
+    document.getElementById('iconFail').classList.remove('show');
+    document.getElementById('mainText').textContent = '银盛正在为您审核签约信息';
+    document.getElementById('subText').textContent  = '预估需要 30 分钟，请耐心等待\n审核完成后将以短信通知您';
+    document.getElementById('resultOverlay').classList.remove('show');
+    pollHint.textContent = `${POLL_INTERVAL} 秒后自动刷新状态`;
+    pollProg.style.width = '0%';
+    showToast('状态已重置');
+  }
+
+  /* ============================================================
+     Toast
+  ============================================================ */
+  function showToast(msg, duration = 2200) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), duration);
+  }
+
+  /* ============================================================
+     初始化
+  ============================================================ */
+  startTimer();
+  // 自动轮询已禁用，仅保留手动刷新
+</script>
+</body>
+</html>

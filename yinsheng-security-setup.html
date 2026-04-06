@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>银盛钱包 · 安全设置</title>
+  <style>
+    :root{
+      --primary:#165DFF;--primary-light:#4080FF;--primary-bg:#EEF3FF;--primary-pale:#D6E4FF;
+      --success:#00B42A;--success-bg:#E8FFEA;
+      --error:#F53F3F;--error-bg:#FFECE8;
+      --text-1:#1D2129;--text-2:#4E5969;--text-3:#86909C;--text-dis:#C9CDD4;
+      --border:#E5E6EB;--bg:#F2F3F5;--card:#FFFFFF;
+      --r-sm:6px;--r-md:10px;--r-lg:16px;--r-full:9999px;
+      --shadow-card:0 4px 20px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.04);
+      --tr:200ms cubic-bezier(0.4,0,0.2,1);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;
+      background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased;padding-bottom:100px;}
+
+    /* 步骤条 */
+    .step-bar{background:#fff;padding:20px 16px 16px;border-bottom:1px solid var(--border);}
+    .step-list{display:flex;align-items:flex-start;justify-content:space-between;position:relative;}
+    .step-list::before{content:'';position:absolute;top:14px;left:28px;right:28px;height:2px;background:#E5E6EB;z-index:0;}
+    .step-item{display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;z-index:1;flex:1;}
+    .step-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+      font-size:13px;font-weight:600;background:#E5E6EB;color:#86909C;transition:all var(--tr);}
+    .step-item.active .step-num{background:var(--primary);color:#fff;}
+    .step-item.done .step-num{background:var(--primary);color:#fff;}
+    .step-num svg{display:none;}
+    .step-item.done .step-num span{display:none;}
+    .step-item.done .step-num svg{display:block;}
+    .step-name{font-size:12px;color:#86909C;white-space:nowrap;}
+    .step-item.active .step-name{color:var(--primary);font-weight:500;}
+    .step-item.done .step-name{color:var(--text-1);}
+
+    .page-content{max-width:480px;margin:0 auto;padding:24px 16px 0;}
+
+    /* 安全提示 */
+    .security-tip{display:flex;align-items:flex-start;gap:8px;
+      padding:12px 16px;background:linear-gradient(90deg,#EEF3FF,#F0F9FF);
+      border:1px solid var(--primary-pale);border-radius:var(--r-md);margin-bottom:16px;}
+    .security-tip svg{flex-shrink:0;margin-top:1px;}
+    .security-tip-text{font-size:12px;color:var(--text-2);line-height:1.5;}
+    .security-tip-text strong{color:var(--primary);}
+
+    /* 主卡片 */
+    .main-card{background:#fff;border-radius:var(--r-lg);box-shadow:var(--shadow-card);
+      border:1px solid rgba(229,230,235,.6);margin-bottom:16px;overflow:hidden;}
+    .card-header{padding:16px 20px;border-bottom:1px solid var(--border);
+      display:flex;align-items:center;gap:10px;}
+    .card-icon{width:36px;height:36px;border-radius:var(--r-sm);background:#FFF3E8;
+      display:flex;align-items:center;justify-content:center;}
+    .card-icon.phone{background:var(--primary-bg);}
+    .card-title{font-size:15px;font-weight:600;color:var(--text-1);}
+    .card-body{padding:20px;}
+
+    /* 手机号显示 */
+    .phone-display{display:flex;align-items:center;gap:12px;
+      padding:14px 16px;background:#F7F8FA;border-radius:var(--r-md);margin-bottom:16px;}
+    .phone-icon{width:32px;height:32px;background:var(--primary-bg);border-radius:var(--r-sm);
+      display:flex;align-items:center;justify-content:center;}
+    .phone-info{font-size:13px;color:var(--text-3);}
+    .phone-number{font-size:15px;font-weight:600;color:var(--text-1);letter-spacing:1px;}
+
+    /* 分隔线 */
+    .divider{height:1px;background:var(--border);margin:0 -20px 16px;}
+
+    /* 密码设置 */
+    .pwd-section-title{font-size:13px;font-weight:500;color:var(--text-2);margin-bottom:12px;
+      display:flex;align-items:center;gap:6px;}
+    .pwd-section-title svg{flex-shrink:0;}
+
+    /* 密码输入 */
+    .pwd-field{margin-bottom:12px;}
+    .pwd-field:last-child{margin-bottom:0;}
+    .pwd-label{font-size:13px;font-weight:500;color:var(--text-2);margin-bottom:6px;
+      display:flex;align-items:center;gap:4px;}
+    .pwd-required{color:var(--error);font-size:12px;}
+    .pwd-input-wrap{position:relative;}
+    .pwd-input-row{border:1.5px solid var(--border);border-radius:var(--r-md);
+      background:#FAFBFC;height:48px;display:flex;align-items:center;overflow:hidden;
+      transition:border-color var(--tr),box-shadow var(--tr),background var(--tr);}
+    .pwd-input-row:focus-within{border-color:var(--primary);background:#fff;
+      box-shadow:0 0 0 3px rgba(22,93,255,.10);}
+    .pwd-input-row.has-error{border-color:var(--error);box-shadow:0 0 0 3px rgba(245,63,63,.08);}
+    .pwd-input-row.success{border-color:var(--success);}
+    input.pwd-input{flex:1;height:100%;border:none;outline:none;background:transparent;
+      font-size:16px;color:var(--text-1);padding:0 12px;font-family:inherit;letter-spacing:6px;text-align:center;}
+    input.pwd-input::placeholder{color:var(--text-3);font-size:14px;letter-spacing:0;}
+    .pwd-toggle{width:40px;height:100%;border:none;background:transparent;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;color:var(--text-3);
+      transition:color var(--tr);}
+    .pwd-toggle:hover{color:var(--primary);}
+    .pwd-toggle:disabled{opacity:0.4;cursor:not-allowed;}
+    .pwd-hint{font-size:12px;color:var(--text-3);margin-top:6px;}
+    .pwd-error{font-size:12px;color:var(--error);margin-top:6px;
+      display:flex;align-items:center;gap:4px;}
+    .pwd-success{font-size:12px;color:var(--success);margin-top:6px;
+      display:flex;align-items:center;gap:4px;}
+
+    /* 密码强度 */
+    .pwd-strength{display:flex;align-items:center;gap:8px;margin-top:8px;}
+    .strength-bar{flex:1;height:4px;background:#E5E6EB;border-radius:2px;overflow:hidden;}
+    .strength-fill{height:100%;width:0;background:var(--error);transition:all var(--tr);}
+    .strength-fill.weak{width:33%;background:var(--error);}
+    .strength-fill.medium{width:66%;background:#FF7D00;}
+    .strength-fill.strong{width:100%;background:var(--success);}
+    .strength-text{font-size:12px;color:var(--text-3);}
+
+    /* 验证码区域 - 默认禁用 */
+    .code-section{margin-top:16px;padding-top:16px;border-top:1px dashed var(--border);
+      opacity:0.5;pointer-events:none;transition:opacity var(--tr);}
+    .code-section.enabled{opacity:1;pointer-events:auto;}
+    .code-label{font-size:13px;font-weight:500;color:var(--text-2);margin-bottom:8px;
+      display:flex;align-items:center;gap:4px;}
+    .code-required{color:var(--error);font-size:12px;}
+    .code-input-row{border:1.5px solid var(--border);border-radius:var(--r-md);
+      background:#FAFBFC;height:48px;display:flex;align-items:center;overflow:hidden;
+      transition:border-color var(--tr),box-shadow var(--tr),background var(--tr);}
+    .code-input-row:focus-within{border-color:var(--primary);background:#fff;
+      box-shadow:0 0 0 3px rgba(22,93,255,.10);}
+    .code-input-row.has-error{border-color:var(--error);box-shadow:0 0 0 3px rgba(245,63,63,.08);}
+    input.code-input{flex:1;height:100%;border:none;outline:none;background:transparent;
+      font-size:16px;color:var(--text-1);padding:0 12px;font-family:inherit;letter-spacing:3px;text-align:center;}
+    input.code-input::placeholder{color:var(--text-3);font-size:14px;letter-spacing:0;}
+    .btn-sms{flex-shrink:0;height:100%;padding:0 12px;border:none;
+      border-left:1.5px solid var(--border);background:transparent;
+      color:var(--primary);font-size:13px;font-weight:600;cursor:pointer;
+      white-space:nowrap;font-family:inherit;transition:all var(--tr);}
+    .btn-sms:hover:not(:disabled){background:var(--primary-bg);}
+    .btn-sms:disabled{color:var(--text-dis);cursor:not-allowed;}
+    .code-hint{font-size:12px;color:var(--success);margin-top:6px;}
+    .code-error{font-size:12px;color:var(--error);margin-top:6px;}
+
+    /* 提示文字 */
+    .tip-text{font-size:12px;color:var(--text-3);margin-top:8px;display:flex;align-items:flex-start;gap:4px;}
+    .tip-text svg{flex-shrink:0;margin-top:1px;}
+
+    /* 底部按钮 */
+    .bottom-bar{position:fixed;left:0;right:0;bottom:0;background:#fff;
+      border-top:1px solid var(--border);padding:12px 16px 24px;z-index:100;}
+    .btn-primary{width:100%;max-width:480px;margin:0 auto;display:block;
+      height:48px;border:none;border-radius:var(--r-md);background:var(--primary);color:#fff;
+      font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;
+      transition:all var(--tr);}
+    .btn-primary:hover:not(:disabled){background:var(--primary-light);transform:translateY(-1px);}
+    .btn-primary:disabled{background:#C9CDD4;cursor:not-allowed;transform:none;}
+    .btn-primary.loading{position:relative;color:transparent;pointer-events:none;}
+    .btn-primary.loading::after{content:'';position:absolute;width:20px;height:20px;
+      top:50%;left:50%;margin:-10px 0 0 -10px;border:2px solid rgba(255,255,255,.3);
+      border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* Toast */
+    .toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.9);
+      background:rgba(0,0,0,0.75);color:#fff;padding:12px 20px;border-radius:var(--r-md);
+      font-size:14px;opacity:0;pointer-events:none;transition:all .2s;z-index:1000;}
+    .toast.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+  </style>
+</head>
+<body>
+
+<!-- 步骤条 -->
+<div class="step-bar">
+  <div class="step-list">
+    <div class="step-item done">
+      <div class="step-num"><span>1</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step-name">填写资料</div>
+    </div>
+    <div class="step-item done">
+      <div class="step-num"><span>2</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step-name">银盛审核</div>
+    </div>
+    <div class="step-item done">
+      <div class="step-num"><span>3</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step-name">签约确认</div>
+    </div>
+    <div class="step-item done">
+      <div class="step-num"><span>4</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step-name">绑定银行卡</div>
+    </div>
+    <div class="step-item active">
+      <div class="step-num"><span>5</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step-name">设置密码</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num"><span>6</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step-name">申请成功</div>
+    </div>
+  </div>
+</div>
+
+<div class="page-content">
+
+  <!-- 安全提示 -->
+  <div class="security-tip">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M8 1.5L2.5 4v4.5c0 2.5 1.75 4.8 4 5.5 2.25-.7 4-3 4-5.5V4L8 1.5z" fill="#EEF3FF" stroke="#165DFF" stroke-width="1.2" stroke-linejoin="round"/>
+      <path d="M5.5 8l2 2 3-3" stroke="#165DFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="security-tip-text">
+      为保障账户安全，请先<strong>设置支付密码</strong>，设置成功后再验证手机号
+    </div>
+  </div>
+
+  <!-- 安全设置卡片 -->
+  <div class="main-card">
+    <div class="card-header">
+      <div class="card-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <rect x="3" y="7" width="12" height="9" rx="2" stroke="#FF7D00" stroke-width="1.2"/>
+          <path d="M6 7V5a3 3 0 016 0v2" stroke="#FF7D00" stroke-width="1.2"/>
+          <circle cx="9" cy="12" r="1.5" fill="#FF7D00"/>
+        </svg>
+      </div>
+      <span class="card-title">设置支付密码</span>
+    </div>
+    <div class="card-body">
+      <!-- 密码设置区域 -->
+      <div class="pwd-section-title">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M7 1v4M7 9v4M1 7h4M9 7h4" stroke="#165DFF" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span>请先设置6位数字支付密码</span>
+      </div>
+
+      <!-- 新密码 -->
+      <div class="pwd-field">
+        <div class="pwd-label">设置密码 <span class="pwd-required">*</span></div>
+        <div class="pwd-input-wrap">
+          <div class="pwd-input-row" id="pwdRow1">
+            <input class="pwd-input" id="pwdInput1" type="password"
+              placeholder="请输入6位数字密码" maxlength="6"
+              oninput="onPwdInput1(this)" autocomplete="new-password"/>
+            <button class="pwd-toggle" id="toggle1" onclick="togglePwd('pwdInput1', this)">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" class="eye-open">
+                <path d="M2 9s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" stroke="currentColor" stroke-width="1.2"/>
+                <circle cx="9" cy="9" r="2.5" stroke="currentColor" stroke-width="1.2"/>
+              </svg>
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" class="eye-close" style="display:none;">
+                <path d="M2 9s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" stroke="currentColor" stroke-width="1.2"/>
+                <circle cx="9" cy="9" r="2.5" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M3 3l12 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="pwd-hint">密码为6位纯数字，建议避免使用连续或重复数字</div>
+        <div class="pwd-strength" id="pwdStrength" style="display:none;">
+          <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+          <span class="strength-text" id="strengthText">密码强度</span>
+        </div>
+      </div>
+
+      <!-- 确认密码 -->
+      <div class="pwd-field">
+        <div class="pwd-label">确认密码 <span class="pwd-required">*</span></div>
+        <div class="pwd-input-wrap">
+          <div class="pwd-input-row" id="pwdRow2">
+            <input class="pwd-input" id="pwdInput2" type="password"
+              placeholder="请再次输入密码" maxlength="6"
+              oninput="onPwdInput2(this)" autocomplete="new-password"/>
+            <button class="pwd-toggle" id="toggle2" onclick="togglePwd('pwdInput2', this)">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" class="eye-open">
+                <path d="M2 9s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" stroke="currentColor" stroke-width="1.2"/>
+                <circle cx="9" cy="9" r="2.5" stroke="currentColor" stroke-width="1.2"/>
+              </svg>
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" class="eye-close" style="display:none;">
+                <path d="M2 9s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" stroke="currentColor" stroke-width="1.2"/>
+                <circle cx="9" cy="9" r="2.5" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M3 3l12 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="pwd-error" id="pwdError2" style="display:none;">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <circle cx="6" cy="6" r="5.5" stroke="#F53F3F"/>
+            <path d="M6 3.5v3M6 8.5h.01" stroke="#F53F3F" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          <span>两次输入的密码不一致</span>
+        </div>
+        <div class="pwd-success" id="pwdSuccess2" style="display:none;">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <circle cx="6" cy="6" r="5.5" stroke="#00B42A"/>
+            <path d="M3.5 6l2 2 3-3" stroke="#00B42A" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>密码一致</span>
+        </div>
+      </div>
+
+      <!-- 验证码区域 - 需要密码设置完成后才启用 -->
+      <div class="code-section" id="codeSection">
+        <div class="divider" style="margin:-20px -20px 16px;background:var(--border);"></div>
+        
+        <div class="pwd-section-title" style="margin-bottom:12px;">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M4 1h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V3a2 2 0 012-2z" stroke="#165DFF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M1 4h12" stroke="#165DFF" stroke-width="1.2" stroke-linecap="round"/>
+            <path d="M4 7h6M4 9h4" stroke="#165DFF" stroke-width="1" stroke-linecap="round"/>
+          </svg>
+          <span>支付密码设置成功，请验证手机号</span>
+        </div>
+
+        <!-- 手机号显示 -->
+        <div class="phone-display" style="margin-bottom:12px;">
+          <div class="phone-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="3" y="1" width="10" height="14" rx="2" stroke="#165DFF" stroke-width="1.2"/>
+              <circle cx="8" cy="12" r="1" fill="#165DFF"/>
+              <path d="M5 4h6" stroke="#165DFF" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <div class="phone-info">验证手机号</div>
+            <div class="phone-number">138****8888</div>
+          </div>
+        </div>
+
+        <!-- 验证码输入 -->
+        <div class="code-label">短信验证码 <span class="code-required">*</span></div>
+        <div class="code-input-row" id="codeRow">
+          <input class="code-input" id="codeInput" type="tel"
+            placeholder="请输入6位验证码" maxlength="6"
+            oninput="onCodeInput(this)" autocomplete="one-time-code"/>
+          <button class="btn-sms" id="btnSms" onclick="sendSms()">获取验证码</button>
+        </div>
+        <div class="code-hint" id="codeHint" style="display:none;">
+          验证码已发送至 138****8888
+        </div>
+        <div class="code-error" id="codeError" style="display:none;">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <circle cx="6" cy="6" r="5.5" stroke="#F53F3F"/>
+            <path d="M6 3.5v3M6 8.5h.01" stroke="#F53F3F" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          <span id="codeErrorText">验证码错误</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height:16px;"></div>
+</div>
+
+<!-- 底部按钮 -->
+<div class="bottom-bar">
+  <button class="btn-primary" id="btnSubmit" disabled onclick="handleSubmit()">
+    确认设置
+  </button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+function showToast(msg,d=2200){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),d);
+}
+
+let countdown=0,smsTimer=null;
+let pwdVerified = false; // 密码是否已验证设置成功
+
+// 密码可见性切换
+function togglePwd(inputId, btn){
+  const input = document.getElementById(inputId);
+  const eyeOpen = btn.querySelector('.eye-open');
+  const eyeClose = btn.querySelector('.eye-close');
+  if(input.type === 'password'){
+    input.type = 'tel';
+    eyeOpen.style.display = 'none';
+    eyeClose.style.display = 'block';
+  } else {
+    input.type = 'password';
+    eyeOpen.style.display = 'block';
+    eyeClose.style.display = 'none';
+  }
+}
+
+// 密码强度检测
+function checkStrength(pwd){
+  if(pwd.length < 6) return 0;
+  let isSequential = true;
+  for(let i=1;i<pwd.length;i++){
+    if(parseInt(pwd[i]) !== parseInt(pwd[i-1])+1 && parseInt(pwd[i]) !== parseInt(pwd[i-1])-1){
+      isSequential = false;break;
+    }
+  }
+  let isRepeating = pwd.split('').every(c => c === pwd[0]);
+  if(isSequential || isRepeating) return 1;
+  if(/(\d)\1/.test(pwd)) return 2;
+  return 3;
+}
+
+function onPwdInput1(el){
+  el.value = el.value.replace(/\D/g, '');
+  const strength = checkStrength(el.value);
+  const strengthDiv = document.getElementById('pwdStrength');
+  const strengthFill = document.getElementById('strengthFill');
+  const strengthText = document.getElementById('strengthText');
+  
+  if(el.value.length > 0){
+    strengthDiv.style.display = 'flex';
+    strengthFill.className = 'strength-fill';
+    if(strength === 1){strengthFill.classList.add('weak');strengthText.textContent='弱';strengthText.style.color='var(--error)';}
+    else if(strength === 2){strengthFill.classList.add('medium');strengthText.textContent='中';strengthText.style.color='#FF7D00';}
+    else if(strength === 3){strengthFill.classList.add('strong');strengthText.textContent='强';strengthText.style.color='var(--success)';}
+  } else {
+    strengthDiv.style.display = 'none';
+  }
+  checkMatch();
+  updatePwdStatus();
+}
+
+function onPwdInput2(el){
+  el.value = el.value.replace(/\D/g, '');
+  checkMatch();
+  updatePwdStatus();
+}
+
+function checkMatch(){
+  const pwd1 = document.getElementById('pwdInput1').value;
+  const pwd2 = document.getElementById('pwdInput2').value;
+  const error = document.getElementById('pwdError2');
+  const success = document.getElementById('pwdSuccess2');
+  const row2 = document.getElementById('pwdRow2');
+  
+  if(pwd2.length === 6 && pwd1 !== pwd2){
+    error.style.display = 'flex';
+    success.style.display = 'none';
+    row2.classList.add('has-error');
+    row2.classList.remove('success');
+    return false;
+  } else if(pwd2.length === 6 && pwd1 === pwd2){
+    error.style.display = 'none';
+    success.style.display = 'flex';
+    row2.classList.remove('has-error');
+    row2.classList.add('success');
+    return true;
+  } else {
+    error.style.display = 'none';
+    success.style.display = 'none';
+    row2.classList.remove('has-error');
+    return pwd1 === pwd2 && pwd1.length === 6;
+  }
+}
+
+// 更新密码验证状态，决定是否可以获取验证码
+function updatePwdStatus(){
+  const pwd1 = document.getElementById('pwdInput1').value;
+  const pwd2 = document.getElementById('pwdInput2').value;
+  const codeSection = document.getElementById('codeSection');
+  const btnSms = document.getElementById('btnSms');
+  
+  if(pwd1.length === 6 && pwd2.length === 6 && pwd1 === pwd2){
+    // 密码设置成功，启用验证码区域
+    pwdVerified = true;
+    codeSection.classList.add('enabled');
+    btnSms.disabled = false;
+    showToast('支付密码设置成功，可获取验证码', 1500);
+  } else {
+    // 密码未设置成功，禁用验证码区域
+    pwdVerified = false;
+    codeSection.classList.remove('enabled');
+    btnSms.disabled = true;
+  }
+  updateSubmitBtn();
+}
+
+// 更新提交按钮状态
+function updateSubmitBtn(){
+  const pwdValid = pwdVerified;
+  const code = document.getElementById('codeInput').value;
+  const codeValid = pwdVerified && code.length === 6;
+  
+  const btn = document.getElementById('btnSubmit');
+  btn.disabled = !codeValid;
+  
+  // 更新按钮文字
+  if(pwdVerified && code.length === 6){
+    btn.textContent = '确认设置';
+  } else if(pwdVerified){
+    btn.textContent = '请输入验证码';
+  } else {
+    btn.textContent = '请先设置支付密码';
+  }
+}
+
+function onCodeInput(el){
+  el.value = el.value.replace(/\D/g, '');
+  document.getElementById('codeError').style.display = 'none';
+  document.getElementById('codeRow').classList.remove('has-error');
+  updateSubmitBtn();
+}
+
+function sendSms(){
+  if(!pwdVerified){
+    showToast('请先设置并确认支付密码');
+    return;
+  }
+  if(countdown>0)return;
+  
+  countdown=60;
+  const btnSms = document.getElementById('btnSms');
+  btnSms.disabled=true;
+  document.getElementById('codeHint').style.display='block';
+  
+  smsTimer=setInterval(()=>{
+    countdown--;
+    btnSms.textContent=countdown+'s';
+    if(countdown<=0){
+      clearInterval(smsTimer);
+      countdown=0;
+      btnSms.textContent='重新获取';
+      btnSms.disabled=false;
+    }
+  },1000);
+  btnSms.textContent='60s';
+  showToast('验证码已发送（演示码：123456）');
+  document.getElementById('codeInput').focus();
+}
+
+function handleSubmit(){
+  if(!pwdVerified){
+    showToast('请先设置支付密码');
+    return;
+  }
+  
+  const code = document.getElementById('codeInput').value;
+  const btn = document.getElementById('btnSubmit');
+  
+  if(code.length !== 6){
+    showToast('请输入6位验证码');
+    return;
+  }
+  
+  if(code !== '123456'){
+    document.getElementById('codeError').style.display='flex';
+    document.getElementById('codeErrorText').textContent='验证码错误（演示请输入 123456）';
+    document.getElementById('codeRow').classList.add('has-error');
+    return;
+  }
+  
+  btn.classList.add('loading');
+  setTimeout(()=>{
+    showToast('安全设置成功');
+    setTimeout(()=>{
+      window.location.href='yinsheng-onboarding-success.html';
+    },1000);
+  },1500);
+}
+</script>
+</body>
+</html>
