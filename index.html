@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI 原型 - 会员管理系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+        }
+        h1 {
+            font-size: 28px;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 40px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 32px;
+            margin-bottom: 20px;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .card:hover {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+        .card h2 {
+            font-size: 18px;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+        .card p {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+        .card a {
+            display: inline-block;
+            padding: 10px 32px;
+            background: #1677ff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .card a:hover { background: #4096ff; }
+        .card.secondary a { background: #52c41a; }
+        .card.secondary a:hover { background: #73d13d; }
+        .footer {
+            margin-top: 32px;
+            color: #bbb;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🦐 UI 原型</h1>
+        <p class="subtitle">会员管理系统 · 设计稿</p>
+
+        <div class="card">
+            <h2>📋 会员管理</h2>
+            <p>账户管理 / 入驻管理 / 邀请个人会员，含完整筛选、弹窗、标签页交互</p>
+            <a href="member-management.html">打开页面</a>
+        </div>
+
+        <div class="card">
+            <h2>✅ 审批管理</h2>
+            <p>审批流程页面，含筛选条件和表格展示</p>
+            <a href="approval-management.html">打开页面</a>
+        </div>
+
+        <div class="card secondary">
+            <h2>📨 邀请个人会员</h2>
+            <p>个人会员邀请表单页面</p>
+            <a href="invite-personal-member.html">打开页面</a>
+        </div>
+
+        <p class="footer">最后更新：2026-04-03</p>
+    </div>
+</body>
+</html>

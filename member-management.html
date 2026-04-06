@@ -1,0 +1,2823 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>账户管理 - 微动</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Roboto', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            font-size: 14px;
+        }
+
+        /* ========== Header ========== */
+        .header {
+            background: linear-gradient(135deg, #6c5ce7 0%, #a855f7 100%);
+            padding: 0 20px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+            font-size: 14px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 1px;
+        }
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 4px;
+        }
+
+        .header-nav a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            cursor: pointer;
+            padding: 6px 14px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+
+        .header-nav a:hover {
+            color: white;
+            background: rgba(255,255,255,0.15);
+        }
+
+        .header-nav a.active {
+            color: white;
+            background: rgba(255,255,255,0.2);
+            font-weight: 500;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-right .notify {
+            position: relative;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .header-right .notify .badge {
+            position: absolute;
+            top: -4px;
+            right: -6px;
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            padding: 0 4px;
+            border-radius: 8px;
+            line-height: 16px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .user-info:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .user-name {
+            font-size: 13px;
+        }
+
+        /* ========== Main Layout ========== */
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 48px);
+        }
+
+        /* ========== Sidebar ========== */
+        .sidebar {
+            width: 200px;
+            background-color: #fff;
+            border-right: 1px solid #e8eaed;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .sidebar-menu {
+            padding: 12px 16px;
+        }
+
+        .sidebar-group {
+            margin-bottom: 4px;
+        }
+
+        /* Menu group as horizontal tabs row */
+        .sidebar-group-header {
+            padding: 0 4px 0 0;
+            font-size: 13px;
+            color: #999;
+            font-weight: 500;
+            cursor: default;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 2px;
+            white-space: nowrap;
+        }
+
+        .sidebar-group-header.active {
+            color: #6c5ce7;
+        }
+
+        .group-arrow {
+            display: none;
+        }
+
+        .group-icon {
+            font-size: 14px;
+            width: 16px;
+            text-align: center;
+        }
+
+        .sidebar-group-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-group-content.expanded {
+            display: flex;
+        }
+
+        /* Tab-style menu items */
+        .sidebar-item {
+            padding: 10px 12px;
+            font-size: 13px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+        }
+
+        .sidebar-item:hover {
+            color: #6c5ce7;
+        }
+
+        .sidebar-item.active {
+            color: #6c5ce7;
+            font-weight: 600;
+            border-bottom-color: #6c5ce7;
+        }
+
+        .sidebar-item .icon {
+            width: 16px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        /* ========== Content Area ========== */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ========== Tabs Bar ========== */
+        .tabs-bar {
+            background-color: #fff;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #e8eaed;
+            height: 38px;
+            flex-shrink: 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+            gap: 0;
+        }
+
+        .tabs-bar::-webkit-scrollbar {
+            height: 0;
+        }
+
+        .tabs-bar.has-scroll-left {
+            padding-left: 12px;
+        }
+
+        .tabs-bar.has-scroll-right {
+            padding-right: 12px;
+        }
+
+        .tabs-bar.has-scroll-left::before,
+        .tabs-bar.has-scroll-right::after {
+            content: '';
+            position: sticky;
+            top: 0;
+            width: 12px;
+            height: 38px;
+            flex-shrink: 0;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .tabs-bar.has-scroll-left::before {
+            left: 0;
+            background: linear-gradient(to right, rgba(255,255,255,0.95), transparent);
+            margin-left: -16px;
+        }
+
+        .tabs-bar.has-scroll-right::after {
+            right: 0;
+            background: linear-gradient(to left, rgba(255,255,255,0.95), transparent);
+            margin-right: -16px;
+        }
+
+        .tab-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0 14px;
+            height: 38px;
+            font-size: 13px;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s;
+            position: relative;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .tab-item.active {
+            color: #6c5ce7;
+            border-bottom-color: #6c5ce7;
+            font-weight: 500;
+        }
+
+        .tab-item:hover {
+            color: #6c5ce7;
+        }
+
+        .tab-close {
+            font-size: 14px;
+            color: #bbb;
+            cursor: pointer;
+            margin-left: 2px;
+            border-radius: 2px;
+            line-height: 1;
+            padding: 0 2px;
+        }
+
+        .tab-close:hover {
+            color: #ff4d4f;
+            background: #fff1f0;
+        }
+
+        .tab-item.is-home .tab-close {
+            display: none;
+        }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ===== Inner Sub-Tab (账户管理 / 入驻管理) ===== */
+        .inner-tab-bar {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border-bottom: 1px solid #e8eaed;
+            padding: 0 24px;
+            height: 42px;
+            flex-shrink: 0;
+            /* 突破 content-scroll 的 padding，让 tab-bar 紧贴顶部和两侧 */
+            margin: -16px -16px 16px -16px;
+        }
+
+        .inner-tab-item {
+            display: inline-flex;
+            align-items: center;
+            height: 42px;
+            padding: 0 16px;
+            font-size: 14px;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .inner-tab-item.active {
+            color: #6c5ce7;
+            border-bottom-color: #6c5ce7;
+            font-weight: 500;
+        }
+
+        .inner-tab-item:hover {
+            color: #6c5ce7;
+        }
+
+        /* 内容区域包含 inner-tab-bar 时，content-scroll 不再单独处理内边距 */
+        .inner-tab-content {
+            padding: 0;
+        }
+
+        /* ===== Progress Bar (入驻管理) ===== */
+        .progress-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .progress-bar-track {
+            flex: 1;
+            height: 6px;
+            background: #f0f0f0;
+            border-radius: 3px;
+            overflow: hidden;
+            min-width: 80px;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: #6c5ce7;
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+        .progress-text {
+            font-size: 12px;
+            color: #6c5ce7;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        /* ========== Scrollable Content ========== */
+        .content-scroll {
+            flex: 1;
+            overflow-x: hidden;
+            overflow-y: auto;
+            padding: 16px;
+            background-color: #f0f2f5;
+        }
+
+        /* ========== Action Card ========== */
+        .action-card {
+            background: #fff;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            border: 1px solid #e8eaed;
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-card .btn,
+        .table-toolbar .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 7px 18px;
+            height: 32px;
+            background: #6c5ce7;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .action-card .btn:hover,
+        .table-toolbar .btn:hover {
+            background: #5b4bd5;
+            box-shadow: 0 2px 8px rgba(108, 92, 231, 0.3);
+        }
+
+        /* ========== Filter Card ========== */
+        .filter-card {
+            background: #fff;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #e8eaed;
+        }
+
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 24px;
+            margin-bottom: 12px;
+            align-items: flex-end;
+        }
+
+        .filter-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .filter-label {
+            font-size: 13px;
+            color: #666;
+            font-weight: 500;
+            width: 90px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .filter-input {
+            padding: 5px 10px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #333;
+            height: 32px;
+            line-height: 32px;
+            transition: border-color 0.2s;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: #6c5ce7;
+            box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.1);
+        }
+
+        .filter-input::placeholder {
+            color: #bbb;
+        }
+
+        .filter-select {
+            padding: 0 10px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #333;
+            height: 32px;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .date-range {
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+        .date-range:hover { border-color: #6c5ce7; }
+        .date-range:focus-within { border-color: #6c5ce7; box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.1); }
+        .date-range .filter-input {
+            border: none;
+            border-radius: 0;
+            padding: 5px 10px;
+            text-align: center;
+        }
+        .date-range .filter-input:focus { box-shadow: none; }
+        .date-range .separator {
+            color: #999;
+            font-size: 12px;
+            padding: 0 6px;
+            background: #fafafa;
+            line-height: 28px;
+            user-select: none;
+        }
+
+        .quick-dates {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .quick-date-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #666;
+            cursor: pointer;
+            background: transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .quick-date-btn:hover {
+            color: #6c5ce7;
+            background: rgba(108, 92, 231, 0.05);
+        }
+
+        .quick-date-btn.active {
+            color: #6c5ce7;
+            background: rgba(108, 92, 231, 0.05);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .btn-search {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 7px 20px;
+            height: 32px;
+            background: #6c5ce7;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-search:hover {
+            background: #5b4bd5;
+            box-shadow: 0 2px 8px rgba(108, 92, 231, 0.3);
+        }
+
+        .btn-reset {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 7px 20px;
+            height: 32px;
+            background: #fff;
+            color: #666;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-reset:hover {
+            border-color: #6c5ce7;
+            color: #6c5ce7;
+        }
+
+        /* ========== Table Card ========== */
+        .table-card {
+            background: #fff;
+            border-radius: 6px;
+            border: 1px solid #e8eaed;
+            overflow: visible;
+        }
+
+        .table-toolbar {
+            padding: 10px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .table-info {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            overflow-y: visible;
+            position: relative;
+        }
+
+        .table-wrapper::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-track {
+            background: #f5f5f5;
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb {
+            background: #d0d0d0;
+            border-radius: 3px;
+        }
+
+        table {
+            width: max-content;
+            min-width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 13px;
+        }
+
+        thead th {
+            padding: 10px 14px;
+            text-align: left;
+            font-weight: 500;
+            color: #666;
+            white-space: nowrap;
+            background-color: #fafafa;
+            border-bottom: 1px solid #e8eaed;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            font-size: 12px;
+        }
+
+        tbody td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #f0f0f0;
+            white-space: nowrap;
+            font-size: 13px;
+            position: relative;
+        }
+
+        tbody tr:hover td {
+            background-color: #fafbff;
+        }
+
+        tbody tr {
+            position: relative;
+        }
+
+        /* ===== Sticky Left Columns ===== */
+        th.sticky-left-0,
+        td.sticky-left-0 {
+            position: sticky;
+            left: 0;
+            z-index: 3;
+            background-color: #fafafa;
+        }
+
+        thead th.sticky-left-0 {
+            z-index: 4;
+            background-color: #fafafa;
+        }
+
+        tbody tr:hover td.sticky-left-0 {
+            background-color: #f5f5ff;
+        }
+
+        th.sticky-left-0,
+        td.sticky-left-0 {
+            position: sticky;
+            left: 40px;
+            z-index: 3;
+            background-color: #fafafa;
+        }
+
+        thead th.sticky-left-0 {
+            z-index: 4;
+            background-color: #fafafa;
+        }
+
+        tbody tr:hover td.sticky-left-0 {
+            background-color: #f5f5ff;
+        }
+
+        /* Left shadow */
+        th.sticky-left-0::after,
+        td.sticky-left-0::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -8px;
+            bottom: 0;
+            width: 8px;
+            pointer-events: none;
+        }
+
+        .table-wrapper.has-scroll-left th.sticky-left-0::after,
+        .table-wrapper.has-scroll-left td.sticky-left-0::after {
+            box-shadow: inset 8px 0 8px -8px rgba(0, 0, 0, 0.06);
+        }
+
+        /* ===== Sticky Right Column ===== */
+        th.sticky-right,
+        td.sticky-right {
+            position: sticky;
+            right: 0;
+            z-index: 3;
+            background-color: #fafafa;
+        }
+
+        thead th.sticky-right {
+            z-index: 4;
+            background-color: #fafafa;
+        }
+
+        tbody tr:hover td.sticky-right {
+            background-color: #f5f5ff;
+        }
+
+        /* Right shadow */
+        th.sticky-right::before,
+        td.sticky-right::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -8px;
+            bottom: 0;
+            width: 8px;
+            pointer-events: none;
+        }
+
+        .table-wrapper.has-scroll-right th.sticky-right::before,
+        .table-wrapper.has-scroll-right td.sticky-right::before {
+            box-shadow: inset -8px 0 8px -8px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Column borders */
+        thead th {
+            border-right: 1px solid #eee;
+        }
+
+        tbody td {
+            border-right: 1px solid #f5f5f5;
+        }
+
+        /* ===== Status ===== */
+        .checkbox {
+            width: 15px;
+            height: 15px;
+            cursor: pointer;
+            accent-color: #6c5ce7;
+        }
+
+        .status-tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-pass {
+            color: #52c41a;
+            background: #f6ffed;
+            border: 1px solid #b7eb8f;
+        }
+
+        .status-pending {
+            color: #faad14;
+            background: #fffbe6;
+            border: 1px solid #ffe58f;
+        }
+
+        .status-reject {
+            color: #ff4d4f;
+            background: #fff2f0;
+            border: 1px solid #ffccc7;
+        }
+
+        .account-cell {
+            white-space: normal !important;
+            max-width: 220px;
+            line-height: 1.5;
+            font-size: 12px;
+        }
+
+        .account-id {
+            color: #999;
+            font-size: 11px;
+        }
+
+        .bank-cell {
+            white-space: normal !important;
+            max-width: 200px;
+            line-height: 1.5;
+            font-size: 12px;
+        }
+
+        .action-link {
+            color: #6c5ce7;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 12px;
+            margin-right: 6px;
+            transition: opacity 0.15s;
+        }
+
+        .action-link:hover {
+            opacity: 0.7;
+            text-decoration: underline;
+        }
+
+        .action-dropdown {
+            position: relative;
+            display: inline-block;
+            color: #6c5ce7;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 2px;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: fixed;
+            background: #fff;
+            border: 1px solid #e8eaed;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 10000;
+            min-width: 130px;
+            padding: 4px 0;
+        }
+
+        .dropdown-menu-item {
+            padding: 7px 16px;
+            font-size: 13px;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .dropdown-menu-item:hover {
+            background: #f5f7fa;
+            color: #6c5ce7;
+        }
+
+        .dropdown-menu-item.highlight {
+            color: #6c5ce7;
+            font-weight: 500;
+        }
+
+        /* ===== SMS Verification Modal ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 20000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .sms-modal {
+            background: #fff;
+            border-radius: 8px;
+            width: 480px;
+            max-width: 90vw;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .sms-modal-header {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            position: relative;
+        }
+
+        .sms-modal-back {
+            position: absolute;
+            left: 20px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #666;
+            font-size: 18px;
+            border-radius: 4px;
+            transition: all 0.15s;
+        }
+
+        .sms-modal-back:hover {
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        .sms-modal-title {
+            flex: 1;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .sms-modal-close {
+            position: absolute;
+            right: 16px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #999;
+            font-size: 20px;
+            border-radius: 4px;
+            transition: all 0.15s;
+        }
+
+        .sms-modal-close:hover {
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        .sms-modal-body {
+            padding: 32px 40px 40px;
+            text-align: center;
+        }
+
+        .sms-modal-subtitle {
+            font-size: 20px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 16px;
+        }
+
+        .sms-modal-desc {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 4px;
+        }
+
+        .sms-modal-phone {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 24px;
+        }
+
+        .sms-code-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .sms-code-input {
+            width: 44px;
+            height: 44px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 500;
+            color: #333;
+            outline: none;
+            transition: all 0.15s;
+        }
+
+        .sms-code-input:focus {
+            border-color: #6c5ce7;
+            box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.1);
+        }
+
+        .sms-code-input.filled {
+            border-color: #6c5ce7;
+        }
+
+        .sms-send-btn {
+            font-size: 13px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.15s;
+            display: inline-block;
+        }
+
+        .sms-send-btn:hover {
+            color: #6c5ce7;
+        }
+
+        .sms-send-btn.counting {
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .sms-modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .sms-modal-btn-close {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 9px 28px;
+            height: 36px;
+            background: #6c5ce7;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sms-modal-btn-close:hover {
+            background: #5b4bd5;
+            box-shadow: 0 2px 8px rgba(108, 92, 231, 0.3);
+        }
+
+        /* ===== Set Password Modal ===== */
+        .set-pwd-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 21000;
+            align-items: center;
+            justify-content: center;
+        }
+        .set-pwd-overlay.active { display: flex; }
+
+        .set-pwd-modal {
+            background: #fff;
+            border-radius: 8px;
+            width: 480px;
+            max-width: 90vw;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+
+        .set-pwd-header {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            position: relative;
+        }
+        .set-pwd-back {
+            position: absolute;
+            left: 20px;
+            width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: #666; font-size: 18px;
+            border-radius: 4px; transition: all 0.15s;
+        }
+        .set-pwd-back:hover { background: #f5f7fa; color: #333; }
+        .set-pwd-title {
+            flex: 1; text-align: center;
+            font-size: 16px; font-weight: 500; color: #333;
+        }
+        .set-pwd-close {
+            position: absolute; right: 16px;
+            width: 28px; height: 28px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: #999; font-size: 20px;
+            border-radius: 4px; transition: all 0.15s;
+        }
+        .set-pwd-close:hover { background: #f5f7fa; color: #333; }
+
+        .set-pwd-body {
+            padding: 32px 40px 40px;
+            text-align: center;
+        }
+        .set-pwd-subtitle {
+            font-size: 20px; font-weight: 500; color: #333; margin-bottom: 6px;
+        }
+        .set-pwd-desc {
+            font-size: 13px; color: #999; margin-bottom: 24px;
+        }
+        .set-pwd-inputs {
+            display: flex; justify-content: center; gap: 8px; margin-bottom: 20px;
+        }
+        .set-pwd-input {
+            width: 44px; height: 44px;
+            border: 1px solid #d9d9d9; border-radius: 4px;
+            text-align: center; font-size: 20px; font-weight: 500;
+            color: #333; outline: none; transition: all 0.15s;
+            -webkit-text-security: disc;
+        }
+        .set-pwd-input:focus {
+            border-color: #6c5ce7;
+            box-shadow: 0 0 0 2px rgba(108,92,231,0.1);
+        }
+        .set-pwd-input.filled { border-color: #6c5ce7; }
+
+        .set-pwd-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #f0f0f0;
+            display: flex; justify-content: flex-end;
+        }
+        .set-pwd-btn-close {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 9px 28px;
+            height: 36px;
+            background: #6c5ce7;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .set-pwd-btn-close:hover { background: #5b4bd5; box-shadow: 0 2px 8px rgba(108, 92, 231, 0.3); }
+
+        /* ===== Settle Management (入驻管理) ===== */
+        .settle-page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding: 0 4px;
+        }
+        .settle-page-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #222;
+        }
+
+
+        /* Status Tabs */
+        .status-tabs { display: flex; gap: 2px; }
+        .status-tab {
+            padding: 4px 14px;
+            font-size: 13px;
+            color: #666;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.15s;
+        }
+        .status-tab:hover { background: #f5f5f5; color: #333; }
+        .status-tab.active {
+            background: #6c5ce7;
+            color: #fff;
+        }
+
+        /* Status Tags for settle */
+        .status-tag.status-progress { background: #e6f7ff; color: #1890ff; }
+        .status-tag.status-pending { background: #fff7e6; color: #fa8c16; }
+        .status-tag.status-completed { background: #f6ffed; color: #52c41a; }
+        .status-tag.status-rejected { background: #fff1f0; color: #ff4d4f; }
+        .status-tag.status-cancelled { background: #f5f5f5; color: #999; border: 1px solid #d9d9d9; }
+
+        /* Detail Page */
+        .detail-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+            padding: 0 4px;
+        }
+        .detail-back {
+            font-size: 13px;
+            color: #6c5ce7;
+            cursor: pointer;
+            margin-right: 20px;
+        }
+        .detail-back:hover { text-decoration: underline; }
+        .detail-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #222;
+            flex: 1;
+        }
+        .btn-continue-invite {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 7px 18px;
+            height: 32px;
+            background: #6c5ce7;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-continue-invite:hover { background: #5b4bd5; box-shadow: 0 2px 8px rgba(108, 92, 231, 0.3); }
+
+        .detail-info-row {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+        .detail-info-item { display: flex; align-items: center; gap: 4px; font-size: 13px; }
+        .detail-info-label { color: #999; }
+        .detail-info-value { color: #333; font-weight: 500; }
+
+        .section-title-bar {
+            font-size: 14px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        /* Compact Step Timeline (simplified detail) */
+        .progress-summary {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .step-timeline-compact {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .stc-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 4px;
+            background: #f5f5f5;
+            font-size: 12px;
+            color: #999;
+        }
+        .stc-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            color: #999;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .stc-item.completed { background: #f6ffed; color: #52c41a; }
+        .stc-item.completed .stc-dot { background: #52c41a; color: #fff; }
+        .stc-item.active { background: rgba(108,92,231,0.08); color: #6c5ce7; font-weight: 500; }
+        .stc-item.active .stc-dot { background: #6c5ce7; color: #fff; box-shadow: 0 0 0 3px rgba(108,92,231,0.12); }
+        .stc-label { font-size: 12px; }
+        .progress-remark {
+            margin-top: 14px;
+            font-size: 12px;
+            color: #999;
+            padding: 8px 12px;
+            background: #fafafa;
+            border-radius: 4px;
+            border-left: 3px solid #6c5ce7;
+        }
+
+        /* Continue Invite Modal */
+        .continue-invite-modal {
+            background: #fff;
+            border-radius: 10px;
+            width: 560px;
+            max-width: 92vw;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+            overflow: hidden;
+        }
+        .ci-modal-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 18px 24px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .ci-modal-title { font-size: 16px; font-weight: 600; color: #222; }
+        .ci-modal-close {
+            width: 30px; height: 30px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: #aaa; font-size: 20px; border-radius: 4px;
+        }
+        .ci-modal-close:hover { background: #f5f5f5; color: #555; }
+        .ci-modal-body { padding: 20px 24px; }
+        .ci-field { margin-bottom: 18px; }
+        .ci-field:last-child { margin-bottom: 0; }
+        .ci-label { font-size: 13px; color: #333; font-weight: 500; margin-bottom: 8px; }
+        .ci-value { font-size: 13px; color: #555; }
+        .ci-radio-group { display: flex; flex-direction: column; gap: 8px; }
+        .ci-radio { font-size: 13px; color: #555; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+        .ci-radio input[type="radio"] { accent-color: #6c5ce7; }
+        .ci-link-box {
+            display: flex; align-items: center; gap: 10px;
+            background: #f7f7f7; border-radius: 6px; padding: 12px 14px;
+            border: 1px solid #eee;
+        }
+        .ci-link-url { flex: 1; font-size: 13px; color: #6c5ce7; word-break: break-all; font-family: 'Courier New', monospace; }
+        .ci-copy-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 12px;
+            height: 28px;
+            background: #6c5ce7;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .ci-copy-btn:hover { background: #5b4bd5; }
+        .ci-modal-footer {
+            display: flex; justify-content: flex-end; gap: 10px;
+            padding: 16px 24px; border-top: 1px solid #f0f0f0;
+        }
+        .ci-btn-cancel {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 9px 28px;
+            height: 36px;
+            background: #fff;
+            color: #555;
+            border: 1px solid #d9d9d9;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .ci-btn-cancel:hover { border-color: #6c5ce7; color: #6c5ce7; }
+        .ci-btn-send {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 9px 28px;
+            height: 36px;
+            background: #6c5ce7;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .ci-btn-send:hover { background: #5b4bd5; box-shadow: 0 2px 8px rgba(108, 92, 231, 0.3); }
+        .ci-copy-toast {
+            display: none; position: fixed; top: 60px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.7); color: #fff; padding: 8px 20px; border-radius: 20px;
+            font-size: 13px; z-index: 30000;
+        }
+        .ci-copy-toast.show { display: block; }
+
+        /* ===== Pagination ===== */
+        .pagination {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-top: 1px solid #e8eaed;
+        }
+
+        .pagination-info {
+            font-size: 13px;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        .pagination-btns {
+            display: flex;
+            gap: 4px;
+        }
+
+        .pagination-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-left: auto;
+        }
+
+        .pagination-page-size {
+            font-size: 13px;
+            color: #666;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .pagination-page-size select {
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 13px;
+            color: #333;
+            outline: none;
+        }
+
+        .pagination-jump {
+            font-size: 13px;
+            color: #666;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .pagination-jump input {
+            width: 40px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            padding: 5px;
+            font-size: 13px;
+            text-align: center;
+            outline: none;
+        }
+
+        .pagination-jump input:focus {
+            border-color: #6c5ce7;
+        }
+
+        .page-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 28px;
+            padding: 4px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #666;
+            cursor: pointer;
+            background: #fff;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover {
+            border-color: #6c5ce7;
+            color: #6c5ce7;
+        }
+
+        .page-btn.active {
+            background: #6c5ce7;
+            color: #fff;
+            border-color: #6c5ce7;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-icon">M</div>
+                <span>微动</span>
+            </div>
+            <div class="header-nav">
+                <a href="#">首页</a>
+                <a href="#" class="active">收银台</a>
+                <a href="#">审批管理</a>
+                <a href="#">操作日志</a>
+                <a href="#">系统</a>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="notify">
+                🔔<span class="badge">3</span>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar">林</div>
+                <span class="user-name">林莫娇</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-menu">
+                <!-- 收银台分组 -->
+                <div class="sidebar-group">
+                    <div class="sidebar-group-header active">
+                        <span class="group-arrow">∧</span>
+                        <span class="group-icon">⊞</span>
+                        <span>收银台</span>
+                    </div>
+                    <div class="sidebar-group-content expanded">
+                        <div class="sidebar-item" onclick="TabsSystem.openTab('wallet','资金钱包','member-management.html#wallet','收银台')">
+                            <span class="icon">💰</span> 资金钱包
+                        </div>
+                        <div class="sidebar-item" onclick="TabsSystem.openTab('withdraw','提现管理','member-management.html#withdraw','收银台')">
+                            <span class="icon">💳</span> 提现管理
+                        </div>
+                        <div class="sidebar-item active" id="sidebarAccount" onclick="TabsSystem.openTab('account','账户管理','member-management.html','收银台')">
+                            <span class="icon">👥</span> 账户管理
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 流水管理分组 -->
+                <div class="sidebar-group">
+                    <div class="sidebar-group-header">
+                        <span class="group-arrow">∨</span>
+                        <span class="group-icon">⊞</span>
+                        <span>流水管理</span>
+                    </div>
+                    <div class="sidebar-group-content">
+                        <div class="sidebar-item">
+                            <span class="icon">📄</span> 订单流水
+                        </div>
+                        <div class="sidebar-item">
+                            <span class="icon">🔄</span> 收支明细
+                        </div>
+                        <div class="sidebar-item">
+                            <span class="icon">📊</span> 分账记录
+                        </div>
+                        <div class="sidebar-item">
+                            <span class="icon">📤</span> 提现记录
+                        </div>
+                        <div class="sidebar-item">
+                            <span class="icon">↩️</span> 退款记录
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <!-- Tabs Bar (动态渲染) -->
+            <div class="tabs-bar" id="tabsBar"></div>
+
+            <!-- Scrollable Content -->
+            <div class="content-scroll">
+                <!-- ========== Inner Tab Bar: 账户管理 / 入驻管理 ========== -->
+                <div class="inner-tab-bar">
+                    <div class="inner-tab-item active" id="innerTabAccount" onclick="switchAccountTab('account')">
+                        账户管理
+                    </div>
+                    <div class="inner-tab-item" id="innerTabSettle" onclick="switchAccountTab('settle')">
+                        入驻管理
+                    </div>
+                </div>
+
+                <!-- ========== Tab Panel: 账户管理 ========== -->
+                <div class="tab-panel active inner-tab-content" id="panelAccount">
+                <!-- Filter Card -->
+                <div class="filter-card" id="accountFilterCard">
+                    <!-- Row 1: Date + Quick buttons + Actions -->
+                    <div class="filter-row" style="align-items: center;">
+                        <div class="filter-field" style="flex-direction: row; align-items: center; gap: 12px;">
+                            <label class="filter-label" style="margin-bottom: 0; white-space: nowrap;">创建时间：</label>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <div class="date-range">
+                                    <input type="text" class="filter-input" id="aDateStart" placeholder="开始时间" style="width: 110px; text-align: center;">
+                                    <span class="separator">至</span>
+                                    <input type="text" class="filter-input" id="aDateEnd" placeholder="结束时间" style="width: 110px; text-align: center;">
+                                </div>
+                                <div class="quick-dates">
+                                    <button class="quick-date-btn" onclick="setQuickDate('a','上月')">上月</button>
+                                    <button class="quick-date-btn" onclick="setQuickDate('a','昨天')">昨天</button>
+                                    <button class="quick-date-btn active" onclick="setQuickDate('a','今天')">今天</button>
+                                    <button class="quick-date-btn" onclick="setQuickDate('a','本周')">本周</button>
+                                    <button class="quick-date-btn" onclick="setQuickDate('a','本月')">本月</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="filter-actions" style="margin-left: auto;">
+                            <button class="btn-reset" onclick="resetAccountFilter()">重置</button>
+                            <button class="btn-search" onclick="searchAccount()">搜索</button>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: 步骤（可展开选项，行首）+ 审批状态 + 账户类型 + 帐号名称 + 账户角色 -->
+                    <div class="filter-row" style="gap: 16px 32px;">
+                        <div class="filter-field" style="flex-direction: row; align-items: center; gap: 8px;">
+                            <label class="filter-label" style="margin-bottom: 0; white-space: nowrap;">步骤：</label>
+                            <select class="filter-select" id="aStep" style="width: 160px;">
+                                <option value="">请选择</option>
+                                <option>商户入驻</option>
+                                <option>微信进件</option>
+                                <option>支付宝进件</option>
+                                <option>配置费率</option>
+                                <option>结算账户</option>
+                            </select>
+                        </div>
+                        <div class="filter-field" style="flex-direction: row; align-items: center; gap: 8px;">
+                            <label class="filter-label" style="margin-bottom: 0; white-space: nowrap;">审批状态：</label>
+                            <select class="filter-select" id="aApprovalStatus" style="width: 160px;">
+                                <option value="">请选择</option>
+                                <option>已通过</option>
+                                <option>待审批</option>
+                                <option>已拒绝</option>
+                            </select>
+                        </div>
+                        <div class="filter-field" style="flex-direction: row; align-items: center; gap: 8px;">
+                            <label class="filter-label" style="margin-bottom: 0; white-space: nowrap;">账户类型：</label>
+                            <select class="filter-select" id="aAccountType" style="width: 160px;">
+                                <option value="">请选择</option>
+                                <option>门店</option>
+                                <option>供应商</option>
+                                <option>平台</option>
+                            </select>
+                        </div>
+                        <div class="filter-field" style="flex-direction: row; align-items: center; gap: 8px;">
+                            <label class="filter-label" style="margin-bottom: 0; white-space: nowrap;">帐号名称：</label>
+                            <input type="text" class="filter-input" id="aAccountName" placeholder="请输入关键词" style="width: 160px;">
+                        </div>
+                        <div class="filter-field" style="flex-direction: row; align-items: center; gap: 8px;">
+                            <label class="filter-label" style="margin-bottom: 0; white-space: nowrap;">账户角色：</label>
+                            <select class="filter-select" id="aRole" style="width: 160px;">
+                                <option value="">请选择</option>
+                                <option>个人</option>
+                                <option>企业</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Row 3: 法人姓名、微信认证状态、支付宝认证状态 -->
+                    <div class="filter-row" style="gap: 16px 32px; margin-bottom: 0;">
+                        <div class="filter-field" style="flex-direction: row; align-items: center; gap: 8px;">
+                            <label class="filter-label" style="margin-bottom: 0; white-space: nowrap;">法人姓名：</label>
+                            <input type="text" class="filter-input" id="aLegalName" placeholder="请输入关键词" style="width: 160px;">
+                        </div>
+                        <div class="filter-field" style="flex-direction: row; align-items: center; gap: 8px;">
+                            <label class="filter-label" style="margin-bottom: 0; white-space: nowrap;">微信认证状态：</label>
+                            <select class="filter-select" id="aWxStatus" style="width: 160px;">
+                                <option value="">请选择</option>
+                                <option>审核通过</option>
+                                <option>未认证</option>
+                            </select>
+                        </div>
+                        <div class="filter-field" style="flex-direction: row; align-items: center; gap: 8px;">
+                            <label class="filter-label" style="margin-bottom: 0; white-space: nowrap;">支付宝认证状态：</label>
+                            <select class="filter-select" id="aAliStatus" style="width: 160px;">
+                                <option value="">请选择</option>
+                                <option>审核通过</option>
+                                <option>未认证</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons (Outside filter card) -->
+                <div class="action-card">
+                    <button class="btn">注册个人会员</button>
+                    <button class="btn">注册企业会员</button>
+                </div>
+
+                <!-- Table Card -->
+                <div class="table-card">
+                    <div class="table-toolbar">
+                        <div class="table-info">共 3 条数据</div>
+                    </div>
+                    <div class="table-wrapper" id="tableWrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="sticky-left-0" style="min-width: 220px;">账号名称/商户ID</th>
+                                    <th style="min-width: 80px;">审批状态</th>
+                                    <th style="min-width: 70px;">账户类型</th>
+                                    <th style="min-width: 110px;">会员编号/类型</th>
+                                    <th style="min-width: 120px;">姓名/手机号</th>
+                                    <th style="min-width: 140px;">注册时间/账户类型</th>
+                                    <th style="min-width: 200px;">账户/开户行</th>
+                                    <th style="min-width: 100px;">可用余额</th>
+                                    <th style="min-width: 110px;">收单在途资金</th>
+                                    <th style="min-width: 110px;">分账在途资金</th>
+                                    <th style="min-width: 110px;">提现在途资金</th>
+                                    <th style="min-width: 110px;">可提现余额</th>
+                                    <th style="min-width: 100px;">总余额</th>
+                                    <th style="min-width: 100px;">平台余额</th>
+                                    <th style="min-width: 80px;">会员状态</th>
+                                    <th style="min-width: 80px;">签约状态</th>
+                                    <th style="min-width: 110px;">微信实名认证</th>
+                                    <th style="min-width: 110px;">支付宝实名认证</th>
+                                    <th style="min-width: 120px;">微信子商户号</th>
+                                    <th style="min-width: 130px;">支付宝子商户号</th>
+                                    <!-- Sticky Right -->
+                                    <th class="sticky-right" style="min-width: 160px;">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Row 1 -->
+                                <tr>
+                                    <td class="sticky-left-0 account-cell">
+                                        珠海市香洲区美港奢旅美容<br>
+                                        店(个体工商户)-珠海香洲<br>
+                                        <span class="account-id">8265852729380940</span>
+                                    </td>
+                                    <td><span class="status-tag status-pass">已通过</span></td>
+                                    <td>门店</td>
+                                    <td>753<br><span style="color:#999;">个体工商户</span></td>
+                                    <td>林莫娇<br>13306005749</td>
+                                    <td>2026-04-01<br>直营商户</td>
+                                    <td class="bank-cell">622908123141583678<br>兴业银行股份有限<br>公司分行</td>
+                                    <td>0.00</td>
+                                    <td>0.00</td>
+                                    <td>0.00</td>
+                                    <td>0.00</td>
+                                    <td>0.00</td>
+                                    <td>0.00</td>
+                                    <td>0.00</td>
+                                    <td style="color:#52c41a;">正常</td>
+                                    <td><span style="color:#bbb;">未签约</span></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td class="sticky-right">
+                                        <a class="action-link">详情</a>
+                                        <a class="action-link">复制</a>
+                                        <a class="action-link">变更</a>
+                                        <span class="action-dropdown" onclick="toggleDropdown(event)">更多</span>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 2 -->
+                                <tr>
+                                    <td class="sticky-left-0 account-cell">
+                                        杭州高阳荷叶美容店 (个体<br>
+                                        工商户)-杭州荷叶酒店<br>
+                                        <span class="account-id">8263312729388586</span>
+                                    </td>
+                                    <td><span class="status-tag status-pass">已通过</span></td>
+                                    <td>门店</td>
+                                    <td>595<br><span style="color:#999;">个体工商户</span></td>
+                                    <td>林莫娇<br>13306005749</td>
+                                    <td>2025-10-23<br>直营商户</td>
+                                    <td class="bank-cell">622908123141583678<br>兴业银行股份有限<br>公司分行</td>
+                                    <td>117920.19</td>
+                                    <td>8175.17</td>
+                                    <td>0.00</td>
+                                    <td>0.00</td>
+                                    <td>117920.19</td>
+                                    <td>126095.36</td>
+                                    <td>0.00</td>
+                                    <td style="color:#52c41a;">正常</td>
+                                    <td><span style="color:#6c5ce7;">签约</span></td>
+                                    <td style="color:#52c41a;">审核通过</td>
+                                    <td style="color:#52c41a;">审核通过</td>
+                                    <td>822188424</td>
+                                    <td>2088080444919270</td>
+                                    <td class="sticky-right">
+                                        <a class="action-link">详情</a>
+                                        <a class="action-link">复制</a>
+                                        <a class="action-link">变更</a>
+                                        <span class="action-dropdown" onclick="toggleDropdown(event)">更多</span>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 3 -->
+                                <tr>
+                                    <td class="sticky-left-0 account-cell">
+                                        贵阳市南明区冰兆劉美容店<br>
+                                        (个体工商户)-贵阳南明区<br>
+                                        <span class="account-id">8267017729380979</span>
+                                    </td>
+                                    <td><span class="status-tag status-pass">已通过</span></td>
+                                    <td>门店</td>
+                                    <td>592<br><span style="color:#999;">个体工商户</span></td>
+                                    <td>林莫娇<br>13306005749</td>
+                                    <td>2025-10-22<br>直营商户</td>
+                                    <td class="bank-cell">622908123141583678<br>兴业银行股份有限<br>公司分行</td>
+                                    <td>32898.19</td>
+                                    <td>0.00</td>
+                                    <td style="color:#ff4d4f;">-395.97</td>
+                                    <td>0.00</td>
+                                    <td>32370.23</td>
+                                    <td>32502.22</td>
+                                    <td>0.00</td>
+                                    <td style="color:#52c41a;">正常</td>
+                                    <td><span style="color:#6c5ce7;">签约</span></td>
+                                    <td style="color:#52c41a;">审核通过</td>
+                                    <td style="color:#52c41a;">审核通过</td>
+                                    <td>822192948</td>
+                                    <td>2088080445760615</td>
+                                    <td class="sticky-right">
+                                        <a class="action-link">详情</a>
+                                        <a class="action-link">复制</a>
+                                        <a class="action-link">变更</a>
+                                        <span class="action-dropdown" onclick="toggleDropdown(event)">更多</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Pagination -->
+                    <div class="pagination">
+                        <div class="pagination-info">共 3 条</div>
+                        <div class="pagination-btns">
+                            <button class="page-btn">&lt;</button>
+                            <button class="page-btn active">1</button>
+                            <button class="page-btn">&gt;</button>
+                        </div>
+                        <div class="pagination-right">
+                            <div class="pagination-page-size">10条/页<select><option>10</option><option>20</option><option>50</option></select></div>
+                            <div class="pagination-jump">跳至<input type="text" value="1">页</div>
+                        </div>
+                    </div>
+                </div><!-- end pagination -->
+                </div><!-- end panelAccount -->
+
+                <!-- ========== Tab Panel: 入驻管理 ========== -->
+                <div class="tab-panel inner-tab-content" id="panelSettle" style="display:none;">
+                    <!-- Page Header -->
+                    <div class="settle-page-header">
+                        <div class="settle-page-title">商户管理</div>
+                    </div>
+
+                    <!-- Filter Card -->
+                    <div class="filter-card" id="settleFilterCard">
+                        <!-- Row 1: 申请时间（时间筛选优先首位）+ 文本搜索 + 按钮 -->
+                        <div class="filter-row" style="gap: 16px 24px;">
+                            <div class="filter-field" style="flex-direction: row; align-items: center; gap: 8px;">
+                                <label class="filter-label" style="margin-bottom:0; white-space:nowrap;">申请时间：</label>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <div class="date-range">
+                                        <input type="text" class="filter-input" id="sDateStart" placeholder="开始时间" style="width:110px; text-align:center;">
+                                        <span class="separator">至</span>
+                                        <input type="text" class="filter-input" id="sDateEnd" placeholder="结束时间" style="width:110px; text-align:center;">
+                                    </div>
+                                    <div class="quick-dates">
+                                        <button class="quick-date-btn" onclick="setQuickDate('s','上月')">上月</button>
+                                        <button class="quick-date-btn" onclick="setQuickDate('s','昨天')">昨天</button>
+                                        <button class="quick-date-btn active" onclick="setQuickDate('s','今天')">今天</button>
+                                        <button class="quick-date-btn" onclick="setQuickDate('s','本周')">本周</button>
+                                        <button class="quick-date-btn" onclick="setQuickDate('s','本月')">本月</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="filter-field" style="flex-direction: row; align-items: center; gap: 8px;">
+                                <label class="filter-label" style="margin-bottom:0; white-space:nowrap;">手机号：</label>
+                                <input type="text" class="filter-input" id="sPhone" placeholder="请输入手机号" style="width:150px;">
+                            </div>
+                            <div class="filter-field" style="flex-direction: row; align-items: center; gap: 8px;">
+                                <label class="filter-label" style="margin-bottom:0; white-space:nowrap;">账户名称：</label>
+                                <input type="text" class="filter-input" id="sAccount" placeholder="请输入账户名称" style="width:150px;">
+                            </div>
+                            <div class="filter-field" style="flex-direction: row; align-items: center; gap: 8px;">
+                                <label class="filter-label" style="margin-bottom:0; white-space:nowrap;">姓名：</label>
+                                <input type="text" class="filter-input" id="sName" placeholder="请输入姓名" style="width:120px;">
+                            </div>
+                            <div class="filter-actions" style="margin-left: auto;">
+                                <button class="btn-reset" onclick="resetSettleFilter()">重置</button>
+                                <button class="btn-search" onclick="searchSettle()">搜索</button>
+                            </div>
+                        </div>
+                        <!-- Row 2: 当前步骤（可展开选项，行首） -->
+                        <div class="filter-row" style="gap: 16px 24px;">
+                            <div class="filter-field" style="flex-direction: row; align-items: center; gap: 8px;">
+                                <label class="filter-label" style="margin-bottom:0; white-space:nowrap;">当前步骤：</label>
+                                <div class="status-tabs" id="sStepTabs">
+                                    <span class="status-tab active" onclick="filterByStep(this,'all')">全部</span>
+                                    <span class="status-tab" onclick="filterByStep(this,'step1')">入驻申请</span>
+                                    <span class="status-tab" onclick="filterByStep(this,'step2')">银盛审核</span>
+                                    <span class="status-tab" onclick="filterByStep(this,'step3')">签约确认</span>
+                                    <span class="status-tab" onclick="filterByStep(this,'step4')">绑定银行卡</span>
+                                    <span class="status-tab" onclick="filterByStep(this,'step5')">密码设置</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Row 3: 状态（可展开选项，行首） -->
+                        <div class="filter-row" style="gap: 16px 24px; margin-bottom:0;">
+                            <div class="filter-field" style="flex-direction: row; align-items: center; gap: 8px;">
+                                <label class="filter-label" style="margin-bottom:0; white-space:nowrap;">状态：</label>
+                                <div class="status-tabs" id="sStatusTabs">
+                                    <span class="status-tab active" onclick="filterBySettleStatus(this,'all')">全部</span>
+                                    <span class="status-tab" onclick="filterBySettleStatus(this,'inprogress')">进行中</span>
+                                    <span class="status-tab" onclick="filterBySettleStatus(this,'pending')">待审核</span>
+                                    <span class="status-tab" onclick="filterBySettleStatus(this,'completed')">已完成</span>
+                                    <span class="status-tab" onclick="filterBySettleStatus(this,'rejected')">审核拒绝</span>
+                                    <span class="status-tab" onclick="filterBySettleStatus(this,'cancelled')">已取消</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Table Card -->
+                    <div class="table-card">
+                        <div class="table-toolbar">
+                            <button class="btn" onclick="window.location.href='invite-personal-member.html'">邀请个人会员</button>
+                        </div>
+                        <div class="table-wrapper" id="settleTableWrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th class="sticky-left-0" style="min-width:130px;">手机号</th>
+                                        <th style="min-width:120px;">账户名称</th>
+                                        <th style="min-width:80px;">姓名</th>
+                                        <th style="min-width:140px;">当前步骤</th>
+                                        <th style="min-width:100px;">状态</th>
+                                        <th style="min-width:140px;">申请时间</th>
+                                        <th style="min-width:140px;">更新时间</th>
+                                        <th class="sticky-right" style="min-width:160px;">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- ===== 按步骤顺序排列（5步：入驻申请→银盛审核→签约确认→绑定银行卡→密码设置） ===== -->
+                                    <!-- ===== 审核拒绝仅出现在银盛审核步骤 ===== -->
+                                    <!-- ── Step 1/5 入驻申请 ── -->
+                                    <tr>
+                                        <td class="sticky-left-0">188****7890</td>
+                                        <td>优享咖啡</td>
+                                        <td>黄小咖</td>
+                                        <td data-step="step1">1/5 入驻申请</td>
+                                        <td><span class="status-tag status-progress" data-status="inprogress">进行中</span></td>
+                                        <td>2026-04-02 10:15</td>
+                                        <td>2026-04-02 14:50</td>
+                                        <td class="sticky-right">
+                                            <a class="action-link" onclick="openContinueInvite(this.closest('tr').children[3].textContent.trim())">继续入驻</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sticky-left-0">176****3456</td>
+                                        <td>新星教育培训</td>
+                                        <td>林新星</td>
+                                        <td data-step="step1">1/5 入驻申请</td>
+                                        <td><span class="status-tag status-cancelled" data-status="cancelled">已取消</span></td>
+                                        <td>2026-03-27 16:45</td>
+                                        <td>2026-03-27 18:00</td>
+                                        <td class="sticky-right">
+                                            <a class="action-link" onclick="openContinueInvite(this.closest('tr').children[3].textContent.trim())">继续入驻</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sticky-left-0">155****7654</td>
+                                        <td>吴记甜品</td>
+                                        <td>吴小花</td>
+                                        <td data-step="step1">1/5 入驻申请</td>
+                                        <td><span class="status-tag status-cancelled" data-status="cancelled">已取消</span></td>
+                                        <td>2026-03-26 10:20</td>
+                                        <td>2026-03-28 14:10</td>
+                                        <td class="sticky-right">
+                                            <a class="action-link" onclick="openContinueInvite(this.closest('tr').children[3].textContent.trim())">继续入驻</a>
+                                        </td>
+                                    </tr>
+                                    <!-- ── Step 2/5 银盛审核（仅此步骤可能被拒绝） ── -->
+                                    <tr>
+                                        <td class="sticky-left-0">139****4567</td>
+                                        <td>李氏餐饮</td>
+                                        <td>李四</td>
+                                        <td data-step="step2">2/5 银盛审核</td>
+                                        <td><span class="status-tag status-pending" data-status="pending">待审核</span></td>
+                                        <td>2026-04-02 08:00</td>
+                                        <td>2026-04-02 10:30</td>
+                                        <td class="sticky-right">
+                                            <span style="color:#ccc; font-size:12px;">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sticky-left-0">150****8901</td>
+                                        <td>周记茶楼</td>
+                                        <td>周建国</td>
+                                        <td data-step="step2">2/5 银盛审核</td>
+                                        <td><span class="status-tag status-pending" data-status="pending">待审核</span></td>
+                                        <td>2026-04-01 15:40</td>
+                                        <td>2026-04-02 08:15</td>
+                                        <td class="sticky-right">
+                                            <span style="color:#ccc; font-size:12px;">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sticky-left-0">136****0123</td>
+                                        <td>赵六商行</td>
+                                        <td>赵六</td>
+                                        <td data-step="step2">2/5 银盛审核</td>
+                                        <td><span class="status-tag status-rejected" data-status="rejected">审核拒绝</span></td>
+                                        <td>2026-03-30 14:20</td>
+                                        <td>2026-03-30 17:00</td>
+                                        <td class="sticky-right">
+                                            <a class="action-link" onclick="openContinueInvite(this.closest('tr').children[3].textContent.trim())">继续入驻</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sticky-left-0">152****4321</td>
+                                        <td>旺旺宠物店</td>
+                                        <td>钱多多</td>
+                                        <td data-step="step2">2/5 银盛审核</td>
+                                        <td><span class="status-tag status-rejected" data-status="rejected">审核拒绝</span></td>
+                                        <td>2026-03-29 11:00</td>
+                                        <td>2026-03-31 09:30</td>
+                                        <td class="sticky-right">
+                                            <a class="action-link" onclick="openContinueInvite(this.closest('tr').children[3].textContent.trim())">继续入驻</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sticky-left-0">133****2109</td>
+                                        <td>何鲜生海鲜</td>
+                                        <td>何大海</td>
+                                        <td data-step="step2">2/5 银盛审核</td>
+                                        <td><span class="status-tag status-cancelled" data-status="cancelled">已取消</span></td>
+                                        <td>2026-03-24 09:50</td>
+                                        <td>2026-03-26 11:30</td>
+                                        <td class="sticky-right">
+                                            <a class="action-link" onclick="openContinueInvite(this.closest('tr').children[3].textContent.trim())">继续入驻</a>
+                                        </td>
+                                    </tr>
+                                    <!-- ── Step 3/5 签约确认 ── -->
+                                    <tr>
+                                        <td class="sticky-left-0">138****1234</td>
+                                        <td>小明便利店</td>
+                                        <td>张小明</td>
+                                        <td data-step="step3">3/5 签约确认</td>
+                                        <td><span class="status-tag status-progress" data-status="inprogress">进行中</span></td>
+                                        <td>2026-04-01 09:30</td>
+                                        <td>2026-04-01 11:00</td>
+                                        <td class="sticky-right">
+                                            <a class="action-link" onclick="openContinueInvite(this.closest('tr').children[3].textContent.trim())">继续入驻</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sticky-left-0">158****9087</td>
+                                        <td>郑氏药房</td>
+                                        <td>郑仁心</td>
+                                        <td data-step="step3">3/5 签约确认</td>
+                                        <td><span class="status-tag status-cancelled" data-status="cancelled">已取消</span></td>
+                                        <td>2026-03-28 14:20</td>
+                                        <td>2026-03-30 10:00</td>
+                                        <td class="sticky-right">
+                                            <a class="action-link" onclick="openContinueInvite(this.closest('tr').children[3].textContent.trim())">继续入驻</a>
+                                        </td>
+                                    </tr>
+                                    <!-- ── Step 4/5 绑定银行卡 ── -->
+                                    <tr>
+                                        <td class="sticky-left-0">135****6789</td>
+                                        <td>锦绣美业</td>
+                                        <td>刘美丽</td>
+                                        <td data-step="step4">4/5 绑定银行卡</td>
+                                        <td><span class="status-tag status-progress" data-status="inprogress">进行中</span></td>
+                                        <td>2026-03-25 14:20</td>
+                                        <td>2026-03-27 09:45</td>
+                                        <td class="sticky-right">
+                                            <a class="action-link" onclick="openContinueInvite(this.closest('tr').children[3].textContent.trim())">继续入驻</a>
+                                        </td>
+                                    </tr>
+                                    <!-- ── Step 5/5 密码设置 ── -->
+                                    <tr>
+                                        <td class="sticky-left-0">131****3456</td>
+                                        <td>陈记五金</td>
+                                        <td>陈大强</td>
+                                        <td data-step="step5">5/5 密码设置</td>
+                                        <td><span class="status-tag status-progress" data-status="inprogress">进行中</span></td>
+                                        <td>2026-03-22 08:10</td>
+                                        <td>2026-03-26 16:30</td>
+                                        <td class="sticky-right">
+                                            <a class="action-link" onclick="openContinueInvite(this.closest('tr').children[3].textContent.trim())">继续入驻</a>
+                                        </td>
+                                    </tr>
+                                    <!-- ── 已完成 ── -->
+                                    <tr>
+                                        <td class="sticky-left-0">137****7890</td>
+                                        <td>王五水果店</td>
+                                        <td>王五</td>
+                                        <td><span style="color:#bbb;">-</span></td>
+                                        <td><span class="status-tag status-completed" data-status="completed">已完成</span></td>
+                                        <td>2026-03-28 10:00</td>
+                                        <td>2026-03-29 16:30</td>
+                                        <td class="sticky-right">
+                                            <span style="color:#ccc; font-size:12px;">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sticky-left-0">182****2345</td>
+                                        <td>天意超市</td>
+                                        <td>孙天意</td>
+                                        <td><span style="color:#bbb;">-</span></td>
+                                        <td><span class="status-tag status-completed" data-status="completed">已完成</span></td>
+                                        <td>2026-03-20 09:00</td>
+                                        <td>2026-03-22 11:20</td>
+                                        <td class="sticky-right">
+                                            <span style="color:#ccc; font-size:12px;">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sticky-left-0">186****5678</td>
+                                        <td>老马修车铺</td>
+                                        <td>马志远</td>
+                                        <td><span style="color:#bbb;">-</span></td>
+                                        <td><span class="status-tag status-completed" data-status="completed">已完成</span></td>
+                                        <td>2026-03-15 13:30</td>
+                                        <td>2026-03-18 10:00</td>
+                                        <td class="sticky-right">
+                                            <span style="color:#ccc; font-size:12px;">—</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination -->
+                        <div class="pagination">
+                            <div class="pagination-info">共 14 条</div>
+                            <div class="pagination-btns">
+                                <button class="page-btn">&lt;</button>
+                                <button class="page-btn active">1</button>
+                                <button class="page-btn">&gt;</button>
+                            </div>
+                            <div class="pagination-right">
+                                <div class="pagination-page-size">10条/页<select><option>10</option><option>20</option><option>50</option></select></div>
+                                <div class="pagination-jump">跳至<input type="text" value="1">页</div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- end panelSettle -->
+
+                <!-- ========== Merchant Detail Panel ========== -->
+                <div class="tab-panel" id="panelMerchantDetail" style="display:none;">
+                    <div class="detail-header">
+                        <div class="detail-back" onclick="backToSettle()">← 返回列表</div>
+                        <div class="detail-title">商户详情</div>
+                        <button class="btn-continue-invite" onclick="openContinueInvite(this.closest('tr').children[3].textContent.trim())">继续入驻邀请</button>
+                    </div>
+
+                    <!-- Basic Info -->
+                    <div class="filter-card">
+                        <div class="detail-info-row">
+                            <div class="detail-info-item">
+                                <span class="detail-info-label">手机号：</span>
+                                <span class="detail-info-value">138****1234</span>
+                            </div>
+                            <div class="detail-info-item">
+                                <span class="detail-info-label">姓名：</span>
+                                <span class="detail-info-value">张小明</span>
+                            </div>
+                            <div class="detail-info-item">
+                                <span class="detail-info-label">状态：</span>
+                                <span class="status-tag status-progress" data-status="inprogress">进行中</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Onboarding Progress (Simplified) -->
+                    <div class="filter-card">
+                        <div class="section-title-bar">入驻进度</div>
+                        <div class="progress-summary">
+                            <div class="progress-bar-wrap">
+                                <div class="progress-bar" style="width: 60%;"></div>
+                            </div>
+                            <span class="progress-text">3/5 步骤已完成</span>
+                        </div>
+                        <div class="step-timeline-compact">
+                            <div class="stc-item completed"><span class="stc-dot">✓</span><span class="stc-label">入驻申请</span></div>
+                            <div class="stc-item completed"><span class="stc-dot">✓</span><span class="stc-label">银盛审核</span></div>
+                            <div class="stc-item completed"><span class="stc-dot">✓</span><span class="stc-label">签约确认</span></div>
+                            <div class="stc-item active"><span class="stc-dot">4</span><span class="stc-label">绑定银行卡</span></div>
+                            <div class="stc-item"><span class="stc-dot">5</span><span class="stc-label">密码设置</span></div>
+                        </div>
+                        <div class="progress-remark">当前停留在第4步「绑定银行卡」，最近更新于 04-01 11:00</div>
+                    </div>
+                </div><!-- end panelMerchantDetail -->
+            </div><!-- end content-scroll -->
+
+    <!-- SMS Verification Modal -->
+    <div class="modal-overlay" id="smsModal">
+        <div class="sms-modal">
+            <div class="sms-modal-header">
+                <div class="sms-modal-back" onclick="closeSmsModal()">←</div>
+                <div class="sms-modal-title">短信验证</div>
+                <div class="sms-modal-close" onclick="closeSmsModal()">×</div>
+            </div>
+            <div class="sms-modal-body">
+                <div class="sms-modal-subtitle">输入短信验证码</div>
+                <div class="sms-modal-desc">点击"发送验证码"，验证码将发送到您账户绑定的手机号</div>
+                <div class="sms-modal-phone">177****3403</div>
+                <div class="sms-code-inputs" id="codeInputs">
+                    <input type="text" class="sms-code-input" maxlength="1" data-index="0">
+                    <input type="text" class="sms-code-input" maxlength="1" data-index="1">
+                    <input type="text" class="sms-code-input" maxlength="1" data-index="2">
+                    <input type="text" class="sms-code-input" maxlength="1" data-index="3">
+                    <input type="text" class="sms-code-input" maxlength="1" data-index="4">
+                    <input type="text" class="sms-code-input" maxlength="1" data-index="5">
+                </div>
+                <span class="sms-send-btn" id="sendCodeBtn" onclick="sendSmsCode(event)">发送验证码</span>
+            </div>
+            <div class="sms-modal-footer">
+                <button class="sms-modal-btn-close" onclick="closeSmsModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Set Password Modal -->
+    <div class="set-pwd-overlay" id="setPwdModal">
+        <div class="set-pwd-modal">
+            <div class="set-pwd-header">
+                <div class="set-pwd-back" onclick="backToSmsModal()">←</div>
+                <div class="set-pwd-title">设置密码</div>
+                <div class="set-pwd-close" onclick="closeSetPwdModal()">×</div>
+            </div>
+            <div class="set-pwd-body">
+                <div class="set-pwd-subtitle">设置交易6位数字交易密码</div>
+                <div class="set-pwd-desc">交易密码不能是重复、连续的数字</div>
+                <div class="set-pwd-inputs" id="pwdInputs">
+                    <input type="password" class="set-pwd-input" maxlength="1" data-index="0">
+                    <input type="password" class="set-pwd-input" maxlength="1" data-index="1">
+                    <input type="password" class="set-pwd-input" maxlength="1" data-index="2">
+                    <input type="password" class="set-pwd-input" maxlength="1" data-index="3">
+                    <input type="password" class="set-pwd-input" maxlength="1" data-index="4">
+                    <input type="password" class="set-pwd-input" maxlength="1" data-index="5">
+                </div>
+            </div>
+            <div class="set-pwd-footer">
+                <button class="set-pwd-btn-close" onclick="closeSetPwdModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Continue Invite Modal -->
+    <div class="modal-overlay" id="continueInviteModal">
+        <div class="continue-invite-modal">
+            <div class="ci-modal-header">
+                <div class="ci-modal-title">继续入驻邀请</div>
+                <div class="ci-modal-close" onclick="closeContinueInvite()">×</div>
+            </div>
+            <div class="ci-modal-body">
+                <div class="ci-field">
+                    <div class="ci-label">当前步骤：</div>
+                    <div class="ci-value" id="ciStepDesc">签约确认（已完成，等待客户签署合同）</div>
+                </div>
+                <div class="ci-field">
+                    <div class="ci-label">链接有效期：</div>
+                    <div class="ci-value">7天 <span style="color:#999; font-size:12px;">（有效期不可调整）</span></div>
+                </div>
+                <div class="ci-field">
+                    <div class="ci-label">邀请链接：</div>
+                    <div class="ci-link-box">
+                        <div class="ci-link-url">https://yinsheng.com/c/abc123xyz</div>
+                        <button class="ci-copy-btn" onclick="copyInviteLink()">复制链接</button>
+                    </div>
+                </div>
+                <div class="ci-field">
+                    <div class="ci-label">邀请二维码：</div>
+                    <div style="display:flex; justify-content:center; padding:8px 0;">
+                        <div style="width:140px; height:140px; background:#f5f5f5; border:1px dashed #d9d9d9; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#bbb; font-size:13px;">二维码</div>
+                    </div>
+                </div>
+            </div>
+            <div class="ci-modal-footer">
+                <button class="ci-btn-cancel" onclick="closeContinueInvite()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Copy Toast -->
+    <div class="ci-copy-toast" id="ciCopyToast">复制成功</div>
+
+    <!-- Shared Tabs System -->
+    <script src="tabs-system.js"></script>
+    <script>
+        // ===== Determine current page context by hash =====
+        var _pageHash = window.location.hash.replace('#', '');
+        var _isSettle = (_pageHash === 'settle');
+        // 全局 tab 统一用 account，子页面通过内部 tab 切换区分
+        var _pageId = 'account';
+        var _pageTitle = '账户管理';
+        var _pageUrl = 'member-management.html';
+
+        // ===== Main Tab Switch (for intra-page: account ↔ settle) =====
+        function switchMainTab(tab, el) {
+            if (tab === 'settle') {
+                // 切换到入驻管理标签
+                TabsSystem.openTab('settle', '入驻管理', 'member-management.html#settle', '收银台');
+            } else {
+                // 切换到账户管理标签
+                window.location.href = 'member-management.html';
+            }
+        }
+
+        // ===== Inner Tab Switch (账户管理 / 入驻管理 - 页面内切换) =====
+        function switchAccountTab(tab) {
+            // 更新 tab 栏激活状态
+            document.getElementById('innerTabAccount').classList.remove('active');
+            document.getElementById('innerTabSettle').classList.remove('active');
+            if (tab === 'account') {
+                document.getElementById('innerTabAccount').classList.add('active');
+                TabsSystem.updateCurrentTab('账户管理', 'member-management.html');
+            } else {
+                document.getElementById('innerTabSettle').classList.add('active');
+                TabsSystem.updateCurrentTab('入驻管理', 'member-management.html#settle');
+            }
+
+            // 切换 panel 显示
+            document.getElementById('panelAccount').style.display = tab === 'account' ? 'block' : 'none';
+            document.getElementById('panelSettle').style.display = tab === 'settle' ? 'block' : 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化全局标签页系统
+            var initTitle = _isSettle ? '入驻管理' : '账户管理';
+            var initUrl = _isSettle ? 'member-management.html#settle' : 'member-management.html';
+            TabsSystem.init(_pageId, initTitle, initUrl, '收银台');
+
+            // 根据 hash 切换内部 sub-tab
+            if (_isSettle) {
+                switchAccountTab('settle');
+            }
+
+            // 侧边栏始终激活「账户管理」（入驻管理是其子 tab）
+            var allSidebarItems = document.querySelectorAll('.sidebar-item');
+            allSidebarItems.forEach(function(item) { item.classList.remove('active'); });
+            var accItem = document.getElementById('sidebarAccount');
+            if (accItem) accItem.classList.add('active');
+
+            // Scroll state for account table
+            const wrapper = document.getElementById('tableWrapper');
+            if (wrapper) {
+                function updateScrollState() {
+                    const scrollLeft = wrapper.scrollLeft;
+                    const maxScroll = wrapper.scrollWidth - wrapper.clientWidth;
+                    if (scrollLeft > 2) {
+                        wrapper.classList.add('has-scroll-left');
+                    } else {
+                        wrapper.classList.remove('has-scroll-left');
+                    }
+                    if (maxScroll - scrollLeft > 2) {
+                        wrapper.classList.add('has-scroll-right');
+                    } else {
+                        wrapper.classList.remove('has-scroll-right');
+                    }
+                }
+                wrapper.addEventListener('scroll', updateScrollState);
+                window.addEventListener('resize', updateScrollState);
+                updateScrollState();
+            }
+
+            // Quick date buttons
+            document.querySelectorAll('.quick-date-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.quick-date-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.action-dropdown') && !e.target.closest('.dropdown-menu')) {
+                    document.querySelectorAll('.dropdown-menu').forEach(m => m.remove());
+                }
+            });
+        });
+
+        function toggleDropdown(event) {
+            event.stopPropagation();
+            // Remove any existing dropdown menus first
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.remove());
+
+            const trigger = event.currentTarget;
+            const rect = trigger.getBoundingClientRect();
+
+            // Create dropdown menu and append to body
+            const menu = document.createElement('div');
+            menu.className = 'dropdown-menu';
+            menu.style.display = 'block';
+            menu.style.top = (rect.bottom + 4) + 'px';
+            menu.style.left = (rect.right - 130) + 'px';
+            menu.innerHTML = `
+                <div class="dropdown-menu-item">编辑</div>
+                <div class="dropdown-menu-item">绑卡</div>
+                <div class="dropdown-menu-item">设置状态</div>
+                <div class="dropdown-menu-item">信息变更</div>
+                <div class="dropdown-menu-item highlight" onclick="openSmsModal(event)">设置密码</div>
+                <div class="dropdown-menu-item">校对</div>
+            `;
+            document.body.appendChild(menu);
+        }
+
+        // ===== SMS Modal Functions =====
+        let smsCountdown = 0;
+        let smsTimer = null;
+
+        function openSmsModal(event) {
+            event.stopPropagation();
+            // Close dropdown first
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.remove());
+            // Show modal
+            const modal = document.getElementById('smsModal');
+            modal.classList.add('active');
+            // Clear previous inputs
+            document.querySelectorAll('.sms-code-input').forEach(input => {
+                input.value = '';
+                input.classList.remove('filled');
+            });
+            document.querySelectorAll('.sms-code-input')[0].focus();
+            // Reset send button
+            resetSendBtn();
+        }
+
+        function closeSmsModal() {
+            document.getElementById('smsModal').classList.remove('active');
+            if (smsTimer) {
+                clearInterval(smsTimer);
+                smsTimer = null;
+            }
+            resetSendBtn();
+        }
+
+        function resetSendBtn() {
+            const btn = document.getElementById('sendCodeBtn');
+            btn.textContent = '发送验证码';
+            btn.classList.remove('counting');
+            smsCountdown = 0;
+        }
+
+        function sendSmsCode(event) {
+            event.stopPropagation();
+            if (smsCountdown > 0) return;
+            smsCountdown = 60;
+            const btn = document.getElementById('sendCodeBtn');
+            btn.classList.add('counting');
+            smsTimer = setInterval(function() {
+                smsCountdown--;
+                if (smsCountdown <= 0) {
+                    clearInterval(smsTimer);
+                    smsTimer = null;
+                    btn.textContent = '发送验证码';
+                    btn.classList.remove('counting');
+                } else {
+                    btn.textContent = smsCountdown + '秒后重新发送';
+                }
+            }, 1000);
+        }
+
+        // SMS code input auto-focus logic
+        document.addEventListener('DOMContentLoaded', function() {
+            const codeInputs = document.querySelectorAll('.sms-code-input');
+            codeInputs.forEach(function(input, index) {
+                input.addEventListener('input', function(e) {
+                    // Only allow digits
+                    this.value = this.value.replace(/\D/g, '');
+                    if (this.value) {
+                        this.classList.add('filled');
+                        if (index < codeInputs.length - 1) {
+                            codeInputs[index + 1].focus();
+                        }
+                    } else {
+                        this.classList.remove('filled');
+                    }
+                });
+
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace' && !this.value && index > 0) {
+                        codeInputs[index - 1].focus();
+                        codeInputs[index - 1].value = '';
+                        codeInputs[index - 1].classList.remove('filled');
+                    }
+                });
+
+                // Handle paste
+                input.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    const pasteData = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+                    if (pasteData) {
+                        for (let i = 0; i < Math.min(pasteData.length, codeInputs.length); i++) {
+                            codeInputs[i].value = pasteData[i];
+                            codeInputs[i].classList.add('filled');
+                        }
+                        const nextIndex = Math.min(pasteData.length, codeInputs.length - 1);
+                        codeInputs[nextIndex].focus();
+                    }
+                });
+            });
+        });
+
+        // ===== Set Password Modal Functions =====
+        function openSetPwdModal() {
+            document.getElementById('smsModal').classList.remove('active');
+            const modal = document.getElementById('setPwdModal');
+            modal.classList.add('active');
+            // Clear previous inputs
+            document.querySelectorAll('.set-pwd-input').forEach(function(input) {
+                input.value = '';
+                input.classList.remove('filled');
+            });
+            document.querySelectorAll('.set-pwd-input')[0].focus();
+        }
+
+        function backToSmsModal() {
+            document.getElementById('setPwdModal').classList.remove('active');
+            document.getElementById('smsModal').classList.add('active');
+            document.querySelectorAll('.sms-code-input')[0].focus();
+        }
+
+        function closeSetPwdModal() {
+            document.getElementById('setPwdModal').classList.remove('active');
+            if (smsTimer) {
+                clearInterval(smsTimer);
+                smsTimer = null;
+            }
+            resetSendBtn();
+        }
+
+        // Set password input auto-focus logic
+        (function() {
+            var pwdInputs = document.querySelectorAll('.set-pwd-input');
+            pwdInputs.forEach(function(input, index) {
+                input.addEventListener('input', function() {
+                    this.value = this.value.replace(/\D/g, '');
+                    if (this.value) {
+                        this.classList.add('filled');
+                        if (index < pwdInputs.length - 1) {
+                            pwdInputs[index + 1].focus();
+                        }
+                    } else {
+                        this.classList.remove('filled');
+                    }
+                });
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace' && !this.value && index > 0) {
+                        pwdInputs[index - 1].focus();
+                        pwdInputs[index - 1].value = '';
+                        pwdInputs[index - 1].classList.remove('filled');
+                    }
+                });
+            });
+        })();
+
+        // Check SMS code completion → auto open set password
+        (function() {
+            var codeInputs = document.querySelectorAll('.sms-code-input');
+            codeInputs.forEach(function(input) {
+                input.addEventListener('input', function() {
+                    var allFilled = true;
+                    codeInputs.forEach(function(ci) {
+                        if (!ci.value) allFilled = false;
+                    });
+                    if (allFilled) {
+                        setTimeout(function() { openSetPwdModal(); }, 400);
+                    }
+                });
+            });
+        })();
+
+        // ===== Account Management Filter Functions =====
+        function searchAccount() {
+            var rows = document.querySelectorAll('#tableWrapper tbody tr');
+            var step = (document.getElementById('aStep').value || '').trim();
+            var approval = (document.getElementById('aApprovalStatus').value || '').trim();
+            var type = (document.getElementById('aAccountType').value || '').trim();
+            var name = (document.getElementById('aAccountName').value || '').trim();
+            var role = (document.getElementById('aRole').value || '').trim();
+            var legal = (document.getElementById('aLegalName').value || '').trim();
+            var wxSt = (document.getElementById('aWxStatus').value || '').trim();
+            var aliSt = (document.getElementById('aAliStatus').value || '').trim();
+            var dateStart = (document.getElementById('aDateStart').value || '').trim();
+            var dateEnd = (document.getElementById('aDateEnd').value || '').trim();
+
+            rows.forEach(function(row) {
+                var cells = row.children;
+                // Col 0: 账号名称, 1: 审批状态, 2: 账户类型, 3: 会员编号, 4: 姓名, 5: 注册时间
+                var rAccountName = cells[0] ? cells[0].textContent.trim() : '';
+                var rApproval = cells[1] ? cells[1].textContent.trim() : '';
+                var rType = cells[2] ? cells[2].textContent.trim() : '';
+                var rName = cells[4] ? cells[4].textContent.trim() : '';
+                var rDate = cells[5] ? cells[5].textContent.trim() : '';
+
+                var show = true;
+                if (name && rAccountName.indexOf(name) === -1) show = false;
+                if (approval && rApproval.indexOf(approval) === -1) show = false;
+                if (type && rType.indexOf(type) === -1) show = false;
+                if (legal && rName.indexOf(legal) === -1) show = false;
+                if (dateStart && rDate < dateStart) show = false;
+                if (dateEnd && rDate > dateEnd) show = false;
+
+                row.style.display = show ? '' : 'none';
+            });
+
+            var count = 0;
+            rows.forEach(function(r) { if (r.style.display !== 'none') count++; });
+            var infoEl = document.querySelector('#tableWrapper').closest('.table-card').querySelector('.table-info');
+            if (infoEl) infoEl.textContent = '共 ' + count + ' 条数据';
+        }
+
+        function resetAccountFilter() {
+            var ids = ['aDateStart', 'aDateEnd', 'aStep', 'aApprovalStatus', 'aAccountType', 'aAccountName', 'aRole', 'aLegalName', 'aWxStatus', 'aAliStatus'];
+            ids.forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+
+            document.querySelectorAll('#accountFilterCard .quick-date-btn').forEach(function(b) { b.classList.remove('active'); });
+            document.querySelectorAll('#accountFilterCard .quick-date-btn')[2].classList.add('active');
+
+            // 重置所有下拉框到第一个选项
+            var selects = document.querySelectorAll('#accountFilterCard select');
+            selects.forEach(function(s) { s.selectedIndex = 0; });
+
+            searchAccount();
+        }
+
+        // ===== Settle Management Filter Functions =====
+        var _settleStepFilter = 'all';
+        var _settleStatusFilter = 'all';
+
+        function filterByStep(el, step) {
+            var container = el.closest('.filter-field');
+            container.querySelectorAll('.status-tab').forEach(function(t) { t.classList.remove('active'); });
+            el.classList.add('active');
+            _settleStepFilter = step;
+            applySettleFilter();
+        }
+
+        function filterBySettleStatus(el, status) {
+            var container = el.closest('.filter-field');
+            container.querySelectorAll('.status-tab').forEach(function(t) { t.classList.remove('active'); });
+            el.classList.add('active');
+            _settleStatusFilter = status;
+            applySettleFilter();
+        }
+
+        function applySettleFilter() {
+            var rows = document.querySelectorAll('#settleTableWrapper tbody tr');
+            var phone = (document.getElementById('sPhone').value || '').trim();
+            var account = (document.getElementById('sAccount').value || '').trim();
+            var name = (document.getElementById('sName').value || '').trim();
+            var dateStart = (document.getElementById('sDateStart').value || '').trim();
+            var dateEnd = (document.getElementById('sDateEnd').value || '').trim();
+
+            rows.forEach(function(row) {
+                var cells = row.children;
+                var rPhone = cells[0] ? cells[0].textContent.trim() : '';
+                var rAccount = cells[1] ? cells[1].textContent.trim() : '';
+                var rName = cells[2] ? cells[2].textContent.trim() : '';
+                var rStep = cells[3] ? (cells[3].getAttribute('data-step') || '') : '';
+                var rStatusEl = cells[4] ? cells[4].querySelector('[data-status]') : null;
+                var rStatus = rStatusEl ? rStatusEl.getAttribute('data-status') : '';
+                var rDate = cells[5] ? cells[5].textContent.trim() : '';
+
+                var show = true;
+                if (_settleStepFilter !== 'all' && rStep !== _settleStepFilter) show = false;
+                if (_settleStatusFilter !== 'all' && rStatus !== _settleStatusFilter) show = false;
+                if (phone && rPhone.indexOf(phone) === -1) show = false;
+                if (account && rAccount.indexOf(account) === -1) show = false;
+                if (name && rName.indexOf(name) === -1) show = false;
+                if (dateStart && rDate < dateStart) show = false;
+                if (dateEnd && rDate > dateEnd) show = false;
+
+                row.style.display = show ? '' : 'none';
+            });
+
+            // 更新数据条数
+            var visibleCount = document.querySelectorAll('#settleTableWrapper tbody tr[style=""], #settleTableWrapper tbody tr:not([style])').length;
+            // 由于内联 style 优先级，用另一种方式统计
+            var count = 0;
+            rows.forEach(function(r) { if (r.style.display !== 'none') count++; });
+            var infoEl = document.querySelector('#settleTableWrapper').closest('.table-card').querySelector('.table-info');
+            if (infoEl) infoEl.textContent = '共 ' + count + ' 条数据';
+        }
+
+        function searchSettle() {
+            applySettleFilter();
+        }
+
+        function resetSettleFilter() {
+            document.getElementById('sPhone').value = '';
+            document.getElementById('sAccount').value = '';
+            document.getElementById('sName').value = '';
+            document.getElementById('sDateStart').value = '';
+            document.getElementById('sDateEnd').value = '';
+            _settleStepFilter = 'all';
+            _settleStatusFilter = 'all';
+
+            // 重置步骤标签
+            var stepTabs = document.querySelectorAll('#sStepTabs .status-tab');
+            stepTabs.forEach(function(t) { t.classList.remove('active'); });
+            stepTabs[0].classList.add('active');
+
+            // 重置状态标签
+            var statusTabs = document.querySelectorAll('#sStatusTabs .status-tab');
+            statusTabs.forEach(function(t) { t.classList.remove('active'); });
+            statusTabs[0].classList.add('active');
+
+            // 重置快捷日期按钮
+            document.querySelectorAll('#settleFilterCard .quick-date-btn').forEach(function(b) { b.classList.remove('active'); });
+            document.querySelectorAll('#settleFilterCard .quick-date-btn')[2].classList.add('active');
+
+            applySettleFilter();
+        }
+
+        function setQuickDate(prefix, label) {
+            var container = document.getElementById(prefix === 's' ? 'settleFilterCard' : 'accountFilterCard');
+            var btns = container.querySelectorAll('.quick-date-btn');
+            btns.forEach(function(b) { b.classList.remove('active'); });
+            event.target.classList.add('active');
+
+            var now = new Date();
+            var start, end;
+            if (label === '今天') {
+                start = end = fmtDate(now);
+            } else if (label === '昨天') {
+                var y = new Date(now); y.setDate(y.getDate() - 1);
+                start = end = fmtDate(y);
+            } else if (label === '本周') {
+                var d = now.getDay() || 7;
+                var mon = new Date(now); mon.setDate(mon.getDate() - d + 1);
+                start = fmtDate(mon); end = fmtDate(now);
+            } else if (label === '本月') {
+                start = fmtDate(new Date(now.getFullYear(), now.getMonth(), 1));
+                end = fmtDate(now);
+            } else if (label === '上月') {
+                start = fmtDate(new Date(now.getFullYear(), now.getMonth() - 1, 1));
+                end = fmtDate(new Date(now.getFullYear(), now.getMonth(), 0));
+            }
+
+            var startInput = document.getElementById(prefix + 'DateStart');
+            var endInput = document.getElementById(prefix + 'DateEnd');
+            if (startInput) startInput.value = start || '';
+            if (endInput) endInput.value = end || '';
+
+            if (prefix === 's') applySettleFilter();
+        }
+
+        function fmtDate(d) {
+            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        }
+
+        function openMerchantDetail() {
+            document.getElementById('panelSettle').style.display = 'none';
+            document.getElementById('panelMerchantDetail').style.display = 'block';
+        }
+
+        function backToSettle() {
+            document.getElementById('panelMerchantDetail').style.display = 'none';
+            document.getElementById('panelSettle').style.display = 'block';
+        }
+
+        var _stepDescMap = {
+            '1/5 入驻申请': '入驻申请（等待客户提交入驻资料）',
+            '2/5 银盛审核': '银盛审核（等待平台审核，审核通过后进行签约）',
+            '3/5 签约确认': '签约确认（已完成，等待客户签署合同）',
+            '4/5 绑定银行卡': '绑定银行卡（等待客户绑定结算银行卡）',
+            '5/5 密码设置': '密码设置（等待客户设置登录密码）'
+        };
+
+        function openContinueInvite(step) {
+            var desc = _stepDescMap[step] || step;
+            document.getElementById('ciStepDesc').textContent = desc;
+            document.getElementById('continueInviteModal').classList.add('active');
+        }
+
+        function closeContinueInvite() {
+            document.getElementById('continueInviteModal').classList.remove('active');
+        }
+
+        function copyInviteLink() {
+            var link = 'https://yinsheng.com/c/abc123xyz';
+            navigator.clipboard.writeText(link).then(function() {
+                var toast = document.getElementById('ciCopyToast');
+                toast.classList.add('show');
+                setTimeout(function() { toast.classList.remove('show'); }, 1800);
+            });
+        }
+
+    </script>
+</body>
+</html>

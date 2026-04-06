@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人会员邀请 - 微动</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Roboto', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            font-size: 14px;
+        }
+
+        /* ========== Header ========== */
+        .header {
+            background: linear-gradient(135deg, #6c5ce7 0%, #a855f7 100%);
+            padding: 0 20px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+            font-size: 14px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 1px;
+        }
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 4px;
+        }
+
+        .header-nav a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            cursor: pointer;
+            padding: 6px 14px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+
+        .header-nav a:hover {
+            color: white;
+            background: rgba(255,255,255,0.15);
+        }
+
+        .header-nav a.active {
+            color: white;
+            background: rgba(255,255,255,0.2);
+            font-weight: 500;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-right .notify {
+            position: relative;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .header-right .notify .badge {
+            position: absolute;
+            top: -4px;
+            right: -6px;
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            padding: 0 4px;
+            border-radius: 8px;
+            line-height: 16px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .user-info:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .user-name {
+            font-size: 13px;
+        }
+
+        /* ========== Main Layout ========== */
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 48px);
+        }
+
+        /* ========== Sidebar ========== */
+        .sidebar {
+            width: 200px;
+            background-color: #fff;
+            border-right: 1px solid #e8eaed;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .sidebar-menu {
+            padding: 12px 16px;
+        }
+
+        .sidebar-group {
+            margin-bottom: 4px;
+        }
+
+        /* Tab-style group header */
+        .sidebar-group-header {
+            padding: 0 4px 0 0;
+            font-size: 13px;
+            color: #999;
+            font-weight: 500;
+            cursor: default;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 2px;
+            white-space: nowrap;
+        }
+
+        .sidebar-group-header.active {
+            color: #6c5ce7;
+        }
+
+        .group-arrow {
+            display: none;
+        }
+
+        .group-icon {
+            font-size: 14px;
+            width: 16px;
+            text-align: center;
+        }
+
+        .sidebar-group-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-group-content.expanded {
+            display: flex;
+        }
+
+        /* Tab-style menu items */
+        .sidebar-item {
+            padding: 10px 12px;
+            font-size: 13px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+        }
+
+        .sidebar-item:hover {
+            color: #6c5ce7;
+        }
+
+        .sidebar-item.active {
+            color: #6c5ce7;
+            font-weight: 600;
+            border-bottom-color: #6c5ce7;
+        }
+
+        .sidebar-item .icon {
+            width: 16px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        /* ========== Content Area ========== */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ========== Tabs Bar ========== */
+        .tabs-bar {
+            background-color: #fff;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #e8eaed;
+            height: 38px;
+            flex-shrink: 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+            gap: 0;
+        }
+
+        .tabs-bar::-webkit-scrollbar {
+            height: 0;
+        }
+
+        .tabs-bar.has-scroll-left {
+            padding-left: 12px;
+        }
+
+        .tabs-bar.has-scroll-right {
+            padding-right: 12px;
+        }
+
+        .tabs-bar.has-scroll-left::before,
+        .tabs-bar.has-scroll-right::after {
+            content: '';
+            position: sticky;
+            top: 0;
+            width: 12px;
+            height: 38px;
+            flex-shrink: 0;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .tabs-bar.has-scroll-left::before {
+            left: 0;
+            background: linear-gradient(to right, rgba(255,255,255,0.95), transparent);
+            margin-left: -16px;
+        }
+
+        .tabs-bar.has-scroll-right::after {
+            right: 0;
+            background: linear-gradient(to left, rgba(255,255,255,0.95), transparent);
+            margin-right: -16px;
+        }
+
+        .tab-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0 14px;
+            height: 38px;
+            font-size: 13px;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s;
+            position: relative;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .tab-item.active {
+            color: #6c5ce7;
+            border-bottom-color: #6c5ce7;
+            font-weight: 500;
+        }
+
+        .tab-item:hover {
+            color: #6c5ce7;
+        }
+
+        .tab-close {
+            font-size: 14px;
+            color: #bbb;
+            cursor: pointer;
+            margin-left: 2px;
+            border-radius: 2px;
+            line-height: 1;
+            padding: 0 2px;
+        }
+
+        .tab-close:hover {
+            color: #ff4d4f;
+            background: #fff1f0;
+        }
+
+        .tab-item.is-home .tab-close {
+            display: none;
+        }
+
+        /* ========== Page Header ========== */
+        .page-header {
+            background: #fff;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e8eaed;
+        }
+
+        .page-header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .back-btn:hover {
+            color: #6c5ce7;
+        }
+
+        .page-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .page-header-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-cancel {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 9px 28px;
+            height: 36px;
+            background: #fff;
+            color: #666;
+            border: 1px solid #d9d9d9;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel:hover {
+            border-color: #6c5ce7;
+            color: #6c5ce7;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 9px 28px;
+            height: 36px;
+            background: #6c5ce7;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #5b4bd5;
+            box-shadow: 0 2px 8px rgba(108, 92, 231, 0.3);
+        }
+
+        /* ========== Form Content ========== */
+        .form-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+
+        .form-section {
+            background: #fff;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid #e8eaed;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 16px;
+        }
+
+        .form-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-field {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .form-label {
+            font-size: 13px;
+            color: #333;
+            white-space: nowrap;
+            min-width: 70px;
+        }
+
+        .form-label .required {
+            color: #ff4d4f;
+            margin-right: 2px;
+        }
+
+        .form-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #333;
+            transition: all 0.2s;
+            height: 36px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #6c5ce7;
+            box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: #bbb;
+        }
+
+        .form-select {
+            flex: 1;
+            padding: 0 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #333;
+            height: 36px;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #6c5ce7;
+            box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.1);
+        }
+
+        /* ========== Notice Box ========== */
+        .notice-box {
+            background: #fffbe6;
+            border: 1px solid #ffe58f;
+            border-radius: 4px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+        }
+
+        .notice-title {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .notice-icon {
+            width: 16px;
+            height: 16px;
+            background: #faad14;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .notice-list {
+            list-style: none;
+            padding-left: 22px;
+        }
+
+        .notice-list li {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.8;
+            position: relative;
+        }
+
+        .notice-list li::before {
+            content: '•';
+            position: absolute;
+            left: -12px;
+            color: #999;
+        }
+
+        /* ========== Invite Modal ========== */
+        .invite-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 20000;
+            align-items: center;
+            justify-content: center;
+        }
+        .invite-modal-overlay.active {
+            display: flex;
+        }
+        .invite-modal {
+            background: #fff;
+            border-radius: 10px;
+            width: 520px;
+            max-width: 92vw;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+            overflow: hidden;
+        }
+        .invite-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px 16px;
+        }
+        .invite-modal-header-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #222;
+        }
+        .invite-modal-header-close {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #aaa;
+            font-size: 22px;
+            border-radius: 4px;
+            transition: all 0.15s;
+        }
+        .invite-modal-header-close:hover {
+            background: #f5f5f5;
+            color: #555;
+        }
+        .invite-modal-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+            padding: 0 24px;
+        }
+        .invite-tab-group {
+            display: flex;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid #d9d9d9;
+        }
+        .invite-tab {
+            padding: 7px 32px;
+            font-size: 14px;
+            cursor: pointer;
+            background: #fff;
+            color: #555;
+            transition: all 0.15s;
+            border: none;
+            outline: none;
+        }
+        .invite-tab.active {
+            background: #6c5ce7;
+            color: #fff;
+        }
+        .invite-modal-body {
+            padding: 0 24px;
+            min-height: 260px;
+        }
+        /* QR tab */
+        .invite-qr-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 8px;
+        }
+        .invite-qr-img {
+            width: 200px;
+            height: 200px;
+            margin-bottom: 16px;
+        }
+        .invite-qr-expire {
+            font-size: 13px;
+            color: #888;
+        }
+        /* Link tab */
+        .invite-link-wrap {
+            display: none;
+        }
+        .invite-link-box {
+            background: #f7f7f7;
+            border-radius: 6px;
+            padding: 18px 16px;
+            font-size: 14px;
+            color: #333;
+            line-height: 1.9;
+            min-height: 130px;
+            word-break: break-all;
+        }
+        .invite-link-url {
+            color: #333;
+            margin-top: 10px;
+        }
+        .invite-link-label {
+            color: #888;
+            margin-right: 4px;
+        }
+        .invite-modal-footer {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            padding: 20px 24px 24px;
+        }
+        .invite-btn-primary {
+            padding: 9px 28px;
+            background: #6c5ce7;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .invite-btn-primary:hover { background: #5b4bd5; }
+        .invite-btn-default {
+            padding: 9px 28px;
+            background: #fff;
+            color: #555;
+            border: 1px solid #d9d9d9;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .invite-btn-default:hover { border-color: #6c5ce7; color: #6c5ce7; }
+        .invite-copy-toast {
+            display: none;
+            position: fixed;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 13px;
+            z-index: 30000;
+        }
+        .invite-copy-toast.show { display: block; }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-icon">M</div>
+                <span>微动</span>
+            </div>
+            <div class="header-nav">
+                <a href="#">首页</a>
+                <a href="#" class="active">收银台</a>
+                <a href="#">审批管理</a>
+                <a href="#">操作日志</a>
+                <a href="#">系统</a>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="notify">
+                🔔<span class="badge">3</span>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar">林</div>
+                <span class="user-name">林莫娇</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-menu">
+                <!-- 收银台分组 -->
+                <div class="sidebar-group">
+                    <div class="sidebar-group-header active">
+                        <span class="group-arrow">∧</span>
+                        <span class="group-icon">⊞</span>
+                        <span>收银台</span>
+                    </div>
+                    <div class="sidebar-group-content expanded">
+                        <div class="sidebar-item" onclick="TabsSystem.openTab('wallet','资金钱包','member-management.html#wallet','收银台')">
+                            <span class="icon">💰</span> 资金钱包
+                        </div>
+                        <div class="sidebar-item" onclick="TabsSystem.openTab('withdraw','提现管理','member-management.html#withdraw','收银台')">
+                            <span class="icon">💳</span> 提现管理
+                        </div>
+                        <div class="sidebar-item" onclick="TabsSystem.openTab('account','账户管理','member-management.html','收银台')">
+                            <span class="icon">👥</span> 账户管理
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 流水管理分组 -->
+                <div class="sidebar-group">
+                    <div class="sidebar-group-header">
+                        <span class="group-arrow">∨</span>
+                        <span class="group-icon">⊞</span>
+                        <span>流水管理</span>
+                    </div>
+                    <div class="sidebar-group-content">
+                        <div class="sidebar-item">
+                            <span class="icon">📄</span> 订单流水
+                        </div>
+                        <div class="sidebar-item">
+                            <span class="icon">🔄</span> 收支明细
+                        </div>
+                        <div class="sidebar-item">
+                            <span class="icon">📊</span> 分账记录
+                        </div>
+                        <div class="sidebar-item">
+                            <span class="icon">📤</span> 提现记录
+                        </div>
+                        <div class="sidebar-item">
+                            <span class="icon">↩️</span> 退款记录
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <!-- Tabs Bar (动态渲染) -->
+            <div class="tabs-bar" id="tabsBar"></div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-left">
+                    <div class="back-btn" onclick="window.location.href='member-management.html#settle'">
+                        <span>←</span>
+                        <span>返回</span>
+                    </div>
+                    <div class="page-title">个人会员邀请</div>
+                </div>
+                <div class="page-header-right">
+                    <button class="btn-cancel">取消</button>
+                    <button class="btn-primary">发起邀请</button>
+                </div>
+            </div>
+
+            <!-- Form Content -->
+            <div class="form-content">
+                <!-- 平台信息 -->
+                <div class="form-section">
+                    <div class="section-title">平台信息</div>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label class="form-label"><span class="required">*</span>账户角色</label>
+                            <select class="form-select">
+                                <option>请选择</option>
+                                <option>平台</option>
+                                <option>门店</option>
+                                <option>营销公司</option>
+                                <option>供应商</option>
+                                <option>其他</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label"><span class="required">*</span>账户名称</label>
+                            <input type="text" class="form-input" placeholder="请输入账户名称">
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label"><span class="required">*</span>账户类型</label>
+                            <select class="form-select">
+                                <option>请选择</option>
+                                <option>普通资金分户</option>
+                                <option>交易手续费分户</option>
+                                <option>提现手续费分户</option>
+                                <option>营销费用分户</option>
+                                <option>鉴权费用分户</option>
+                                <option>待清算分户</option>
+                                <option>预付货款分户</option>
+                                <option>平台退款分户</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label"><span class="required">*</span>状态</label>
+                            <select class="form-select">
+                                <option>请选择</option>
+                                <option>正常</option>
+                                <option>禁用</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 注册资料 -->
+                <div class="form-section">
+                    <div class="section-title">注册资料</div>
+                    
+                    <!-- Notice Box -->
+                    <div class="notice-box">
+                        <div class="notice-title">
+                            <span class="notice-icon">!</span>
+                            <span>说明</span>
+                        </div>
+                        <ul class="notice-list">
+                            <li>每次仅支持邀请一名会员，如需继续邀请请重新发起；</li>
+                            <li>邀请发起后，证件号码、银行卡号、银行预留手机号及身份证照片需由被邀请客户自行提交。</li>
+                        </ul>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-field" style="flex: 1; max-width: calc(25% - 18px);">
+                            <label class="form-label"><span class="required">*</span>证件类型</label>
+                            <select class="form-select">
+                                <option>请选择</option>
+                                <option>身份证</option>
+                            </select>
+                        </div>
+                        <div class="form-field" style="flex: 1; max-width: calc(25% - 18px);">
+                            <label class="form-label"><span class="required">*</span>绑卡功能</label>
+                            <select class="form-select">
+                                <option>请选择</option>
+                                <option>提现+消费</option>
+                                <option>仅提现</option>
+                                <option>仅消费</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invite Modal -->
+    <div class="invite-modal-overlay" id="inviteModal">
+        <div class="invite-modal">
+            <div class="invite-modal-header">
+                <div class="invite-modal-header-title">发起邀请</div>
+                <div class="invite-modal-header-close" onclick="closeInviteModal()">×</div>
+            </div>
+            <div class="invite-modal-tabs">
+                <div class="invite-tab-group">
+                    <button class="invite-tab active" id="tabQr" onclick="switchInviteTab('qr')">二维码</button>
+                    <button class="invite-tab" id="tabLink" onclick="switchInviteTab('link')">链接</button>
+                </div>
+            </div>
+            <div class="invite-modal-body">
+                <div class="invite-qr-wrap" id="panelQr">
+                    <canvas id="qrCanvas" class="invite-qr-img" width="200" height="200"></canvas>
+                    <div class="invite-qr-expire">链接有效期：2026-04-09 09:12:00</div>
+                </div>
+                <div class="invite-link-wrap" id="panelLink">
+                    <div class="invite-link-box">
+                        尊敬的客户，您好！诚邀您完成会员注册，注册链接如下：
+                        <div class="invite-link-url">
+                            <span class="invite-link-label">链接：</span>https://inv.example.com/reg/2f8a3b9c
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="invite-modal-footer" id="inviteFooterQr">
+                <button class="invite-btn-primary" onclick="saveQR()">保存到本地</button>
+                <button class="invite-btn-default" onclick="closeInviteModal()">完成</button>
+            </div>
+            <div class="invite-modal-footer" id="inviteFooterLink" style="display:none;">
+                <button class="invite-btn-primary" onclick="copyLink()">复制到粘贴板</button>
+                <button class="invite-btn-default" onclick="closeInviteModal()">完成</button>
+            </div>
+        </div>
+    </div>
+    <div class="invite-copy-toast" id="copyToast">复制成功</div>
+
+    <!-- Shared Tabs System -->
+    <script src="tabs-system.js"></script>
+    <script>
+        // ===== Initialize Tabs System =====
+        document.addEventListener('DOMContentLoaded', function() {
+            TabsSystem.init('invite', '个人会员邀请', 'invite-personal-member.html', '收银台');
+        });
+        // Generate a simple QR-like placeholder on canvas
+        (function drawQR() {
+            const c = document.getElementById('qrCanvas');
+            if (!c) return;
+            const ctx = c.getContext('2d');
+            const size = 200, cell = 8;
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, size, size);
+            ctx.fillStyle = '#333';
+            // Draw finder patterns
+            function finder(x, y) {
+                ctx.fillRect(x, y, cell*7, cell*7);
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(x+cell, y+cell, cell*5, cell*5);
+                ctx.fillStyle = '#333';
+                ctx.fillRect(x+cell*2, y+cell*2, cell*3, cell*3);
+            }
+            finder(0, 0);
+            finder(size - cell*7, 0);
+            finder(0, size - cell*7);
+            // Random data modules
+            const cols = size / cell, rows = size / cell;
+            for (let r = 0; r < rows; r++) {
+                for (let cc = 0; cc < cols; cc++) {
+                    if ((r < 8 && cc < 8) || (r < 8 && cc >= cols-8) || (r >= rows-8 && cc < 8)) continue;
+                    if (Math.random() > 0.52) {
+                        ctx.fillRect(cc*cell, r*cell, cell, cell);
+                    }
+                }
+            }
+        })();
+
+        function switchInviteTab(tab) {
+            document.getElementById('tabQr').classList.toggle('active', tab === 'qr');
+            document.getElementById('tabLink').classList.toggle('active', tab === 'link');
+            document.getElementById('panelQr').style.display = tab === 'qr' ? 'flex' : 'none';
+            document.getElementById('panelLink').style.display = tab === 'link' ? 'block' : 'none';
+            document.getElementById('inviteFooterQr').style.display = tab === 'qr' ? 'flex' : 'none';
+            document.getElementById('inviteFooterLink').style.display = tab === 'link' ? 'flex' : 'none';
+        }
+
+        function openInviteModal() {
+            document.getElementById('inviteModal').classList.add('active');
+        }
+
+        function closeInviteModal() {
+            document.getElementById('inviteModal').classList.remove('active');
+        }
+
+        function saveQR() {
+            const c = document.getElementById('qrCanvas');
+            const link = document.createElement('a');
+            link.download = '邀请二维码.png';
+            link.href = c.toDataURL();
+            link.click();
+        }
+
+        function copyLink() {
+            const text = 'https://inv.example.com/reg/2f8a3b9c';
+            navigator.clipboard.writeText(text).then(function() {
+                const toast = document.getElementById('copyToast');
+                toast.classList.add('show');
+                setTimeout(function() { toast.classList.remove('show'); }, 1800);
+            });
+        }
+
+        // Bind the "发起邀请" button
+        document.addEventListener('DOMContentLoaded', function() {
+            const btn = document.querySelector('.btn-primary');
+            if (btn && btn.textContent.trim() === '发起邀请') {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    openInviteModal();
+                });
+            }
+        });
+    </script>
+</body>
+</html>
