@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>账户管理 - 微动</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Roboto', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            font-size: 14px;
+        }
+
+        /* ========== Header ========== */
+        .header {
+            background: linear-gradient(135deg, #6c5ce7 0%, #a855f7 100%);
+            padding: 0 20px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+            font-size: 14px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 1px;
+        }
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 4px;
+        }
+
+        .header-nav a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            cursor: pointer;
+            padding: 6px 14px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+
+        .header-nav a:hover {
+            color: white;
+            background: rgba(255,255,255,0.15);
+        }
+
+        .header-nav a.active {
+            color: white;
+            background: rgba(255,255,255,0.2);
+            font-weight: 500;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-right .notify {
+            position: relative;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .header-right .notify .badge {
+            position: absolute;
+            top: -4px;
+            right: -6px;
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            padding: 0 4px;
+            border-radius: 8px;
+            line-height: 16px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .user-info:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .user-name {
+            font-size: 13px;
+        }
+
+        /* ========== Main Layout ========== */
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 48px);
+        }
+
+        /* ========== Sidebar ========== */
+        .sidebar {
+            width: 200px;
+            background-color: #fff;
+            border-right: 1px solid #e8eaed;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .sidebar-menu {
+            padding: 12px 16px;
+        }
+
+        .sidebar-group {
+            margin-bottom: 4px;
+        }
+
+        .sidebar-group-header {
+            padding: 0 4px 0 0;
+            font-size: 13px;
+            color: #999;
+            font-weight: 500;
+            cursor: default;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 2px;
+            white-space: nowrap;
+        }
+
+        .sidebar-group-header.active {
+            color: #6c5ce7;
+        }
+
+        .group-arrow {
+            display: none;
+        }
+
+        .group-icon {
+            font-size: 14px;
+            width: 16px;
+            text-align: center;
+        }
+
+        .sidebar-group-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-group-content.expanded {
+            display: flex;
+        }
+
+        .sidebar-item {
+            padding: 10px 12px;
+            font-size: 13px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+        }
+
+        .sidebar-item:hover {
+            color: #6c5ce7;
+        }
+
+        .sidebar-item.active {
+            color: #6c5ce7;
+            font-weight: 600;
+            border-bottom-color: #6c5ce7;
+        }
+
+        .sidebar-item .icon {
+            width: 16px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        /* ========== Content Area ========== */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ========== Tabs Bar ========== */
+        .tabs-bar {
+            background-color: #fff;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #e8eaed;
+            height: 38px;
+            flex-shrink: 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+            gap: 0;
+        }
+
+        .tabs-bar::-webkit-scrollbar {
+            height: 0;
+        }
+
+        .tab-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0 14px;
+            height: 38px;
+            font-size: 13px;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s;
+            position: relative;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .tab-item.active {
+            color: #6c5ce7;
+            border-bottom-color: #6c5ce7;
+            font-weight: 500;
+        }
+
+        .tab-item:hover {
+            color: #6c5ce7;
+        }
+
+        .tab-close {
+            font-size: 14px;
+            color: #bbb;
+            cursor: pointer;
+            margin-left: 2px;
+            border-radius: 2px;
+            line-height: 1;
+            padding: 0 2px;
+        }
+
+        .tab-close:hover {
+            color: #ff4d4f;
+            background: #fff1f0;
+        }
+
+        .tab-item.is-home .tab-close {
+            display: none;
+        }
+
+        /* ========== Scrollable Content ========== */
+        .content-scroll {
+            flex: 1;
+            overflow-x: hidden;
+            overflow-y: auto;
+            padding: 16px;
+            background-color: #f0f2f5;
+        }
+
+        /* ========== Account Info Card (银行卡管理 - 顶部信息区) ========== */
+        .account-info-card {
+            background: #fff;
+            border-radius: 6px;
+            border: 1px solid #e8eaed;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+        }
+
+        .account-info-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .account-info-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .account-info-title .back-btn {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #666;
+            font-size: 16px;
+            border-radius: 4px;
+            transition: all 0.15s;
+        }
+
+        .account-info-title .back-btn:hover {
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        .account-info-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0;
+        }
+
+        .account-info-field {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            min-width: 33.33%;
+        }
+
+        .account-info-label {
+            color: #999;
+            font-size: 13px;
+            width: 90px;
+            flex-shrink: 0;
+            text-align: right;
+            padding-right: 12px;
+        }
+
+        .account-info-value {
+            color: #333;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .account-status-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .account-status-tag.normal {
+            color: #52c41a;
+            background: #f6ffed;
+        }
+
+        .account-status-tag.frozen {
+            color: #ff4d4f;
+            background: #fff2f0;
+        }
+
+        /* ========== Section Header ========== */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 3px;
+            height: 16px;
+            background: #6c5ce7;
+            border-radius: 2px;
+        }
+
+        /* ========== Table Card ========== */
+        .table-card {
+            background: #fff;
+            border-radius: 6px;
+            border: 1px solid #e8eaed;
+            overflow: hidden;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        thead {
+            background: #fafafa;
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 1px solid #e8eaed;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #555;
+            vertical-align: middle;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* 银行卡信息样式 */
+        .bank-card-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bank-logo {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .bank-logo.icbc { background: #e63946; color: white; }
+        .bank-logo.ccb { background: #1a73e8; color: white; }
+        .bank-logo.abc { background: #2e7d32; color: white; }
+        .bank-logo.cmb { background: #c62828; color: white; }
+        .bank-logo.boc { background: #b71c1c; color: white; }
+        .bank-logo.cmbc { background: #e65100; color: white; }
+        .bank-logo.spdb { background: #1565c0; color: white; }
+        .bank-logo.default-bank { background: #78909c; color: white; }
+
+        .bank-card-name {
+            font-size: 13px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .bank-card-type {
+            font-size: 12px;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        .bank-card-number {
+            font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
+            font-size: 13px;
+            color: #555;
+            letter-spacing: 0.5px;
+        }
+
+        .card-status {
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .card-status.bindcard {
+            color: #52c41a;
+            background: #f6ffed;
+        }
+
+        .card-status.unbindcard {
+            color: #999;
+            background: #f5f5f5;
+        }
+
+        .card-status.verifying {
+            color: #fa8c16;
+            background: #fff7e6;
+        }
+
+        .action-link {
+            color: #6c5ce7;
+            cursor: pointer;
+            font-size: 13px;
+            margin-right: 8px;
+        }
+
+        .action-link:hover {
+            text-decoration: underline;
+        }
+
+        .action-link.danger {
+            color: #ff4d4f;
+        }
+
+        .action-link.danger:hover {
+            color: #d9363e;
+        }
+
+        /* ========== Pagination ========== */
+        .pagination {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 12px 16px;
+            border-top: 1px solid #e8eaed;
+            gap: 8px;
+        }
+
+        .pagination-info {
+            font-size: 13px;
+            color: #666;
+            margin-right: 8px;
+        }
+
+        .page-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 28px;
+            padding: 4px 12px;
+            border: 1px solid #d9d9d9;
+            background: #fff;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover {
+            border-color: #6c5ce7;
+            color: #6c5ce7;
+        }
+
+        .page-btn.active {
+            background: #6c5ce7;
+            color: #fff;
+            border-color: #6c5ce7;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .page-size-select {
+            padding: 5px 10px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-left: 8px;
+        }
+
+        .page-jump {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: 8px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .page-jump-input {
+            width: 40px;
+            padding: 5px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-icon">M</div>
+                <span>微动</span>
+            </div>
+            <div class="header-nav">
+                <a>首页</a>
+                <a class="active">收银台</a>
+                <a href="approval-management.html">审批管理</a>
+                <a>操作日志</a>
+                <a>系统</a>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="notify">
+                🔔
+                <span class="badge">3</span>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar">林</div>
+                <span class="user-name">林莫娇</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-menu">
+                <!-- 收银台分组 -->
+                <div class="sidebar-group">
+                    <div class="sidebar-group-header active">
+                        <span class="group-arrow">∧</span>
+                        <span class="group-icon">⊞</span>
+                        <span>收银台</span>
+                    </div>
+                    <div class="sidebar-group-content expanded">
+                        <div class="sidebar-item" onclick="TabsSystem.openTab('wallet','资金钱包','member-management.html#wallet','收银台')">
+                            <span class="icon">💰</span> 资金钱包
+                        </div>
+                        <div class="sidebar-item" onclick="TabsSystem.openTab('withdraw','提现管理','member-management.html#withdraw','收银台')">
+                            <span class="icon">💳</span> 提现管理
+                        </div>
+                        <div class="sidebar-item" onclick="TabsSystem.openTab('account','账户管理','member-management.html','收银台')">
+                            <span class="icon">👥</span> 账户管理
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 流水管理分组 -->
+                <div class="sidebar-group">
+                    <div class="sidebar-group-header">
+                        <span class="group-arrow">∨</span>
+                        <span class="group-icon">⊞</span>
+                        <span>流水管理</span>
+                    </div>
+                    <div class="sidebar-group-content">
+                        <div class="sidebar-item">
+                            <span class="icon">📄</span> 订单流水
+                        </div>
+                        <div class="sidebar-item">
+                            <span class="icon">🔄</span> 收支明细
+                        </div>
+                        <div class="sidebar-item">
+                            <span class="icon">📊</span> 分账记录
+                        </div>
+                        <div class="sidebar-item">
+                            <span class="icon">📤</span> 提现记录
+                        </div>
+                        <div class="sidebar-item">
+                            <span class="icon">↩️</span> 退款记录
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <!-- Tabs Bar (动态渲染) -->
+            <div class="tabs-bar" id="tabsBar"></div>
+
+            <!-- Scrollable Content -->
+            <div class="content-scroll">
+                <!-- ========== 账户信息卡片 ========== -->
+                <div class="account-info-card">
+                    <div class="account-info-header">
+                        <div class="account-info-title">
+                            <span class="back-btn" onclick="TabsSystem.openTab('account','账户管理','member-management.html','收银台')">←</span>
+                            账户详情
+                        </div>
+                    </div>
+                    <div class="account-info-row">
+                        <div class="account-info-field">
+                            <span class="account-info-label">账户名称：</span>
+                            <span class="account-info-value">优享咖啡（龙华店）</span>
+                        </div>
+                        <div class="account-info-field">
+                            <span class="account-info-label">商户编号：</span>
+                            <span class="account-info-value">M20260315001</span>
+                        </div>
+                        <div class="account-info-field">
+                            <span class="account-info-label">联系人：</span>
+                            <span class="account-info-value">张三</span>
+                        </div>
+                        <div class="account-info-field">
+                            <span class="account-info-label">手机号：</span>
+                            <span class="account-info-value">138****5678</span>
+                        </div>
+                        <div class="account-info-field">
+                            <span class="account-info-label">账户状态：</span>
+                            <span class="account-info-value"><span class="account-status-tag normal">正常</span></span>
+                        </div>
+                        <div class="account-info-field">
+                            <span class="account-info-label">创建时间：</span>
+                            <span class="account-info-value">2026-03-15 10:30:00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========== 银行卡列表 ========== -->
+                <div class="section-header">
+                    <div class="section-title">银行卡管理</div>
+                </div>
+
+                <div class="table-card">
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>开户银行</th>
+                                    <th>银行卡号</th>
+                                    <th>持卡人</th>
+                                    <th>证件号码</th>
+                                    <th>银行卡类型</th>
+                                    <th>绑定时间</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>
+                                        <div class="bank-card-info">
+                                            <div class="bank-logo icbc">工</div>
+                                            <div>
+                                                <div class="bank-card-name">中国工商银行</div>
+                                                <div class="bank-card-type">ICBC</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="bank-card-number">6222 **** **** 1234</td>
+                                    <td>张三</td>
+                                    <td>4403****1234</td>
+                                    <td>借记卡</td>
+                                    <td>2026-03-15 14:20:00</td>
+                                    <td><span class="card-status bindcard">已绑定</span></td>
+                                    <td>
+                                        <span class="action-link">详情</span>
+                                        <span class="action-link danger">解绑</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>
+                                        <div class="bank-card-info">
+                                            <div class="bank-logo ccb">建</div>
+                                            <div>
+                                                <div class="bank-card-name">中国建设银行</div>
+                                                <div class="bank-card-type">CCB</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="bank-card-number">6227 **** **** 5678</td>
+                                    <td>张三</td>
+                                    <td>4403****1234</td>
+                                    <td>借记卡</td>
+                                    <td>2026-03-20 09:15:00</td>
+                                    <td><span class="card-status bindcard">已绑定</span></td>
+                                    <td>
+                                        <span class="action-link">详情</span>
+                                        <span class="action-link danger">解绑</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>
+                                        <div class="bank-card-info">
+                                            <div class="bank-logo abc">农</div>
+                                            <div>
+                                                <div class="bank-card-name">中国农业银行</div>
+                                                <div class="bank-card-type">ABC</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="bank-card-number">6228 **** **** 9012</td>
+                                    <td>李四</td>
+                                    <td>4403****5678</td>
+                                    <td>借记卡</td>
+                                    <td>2026-03-28 16:40:00</td>
+                                    <td><span class="card-status verifying">验证中</span></td>
+                                    <td>
+                                        <span class="action-link">详情</span>
+                                        <span class="action-link danger">解绑</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>4</td>
+                                    <td>
+                                        <div class="bank-card-info">
+                                            <div class="bank-logo cmb">招</div>
+                                            <div>
+                                                <div class="bank-card-name">招商银行</div>
+                                                <div class="bank-card-type">CMB</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="bank-card-number">6214 **** **** 3456</td>
+                                    <td>张三</td>
+                                    <td>4403****1234</td>
+                                    <td>借记卡</td>
+                                    <td>2026-04-01 11:05:00</td>
+                                    <td><span class="card-status unbindcard">已解绑</span></td>
+                                    <td>
+                                        <span class="action-link">详情</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td>
+                                        <div class="bank-card-info">
+                                            <div class="bank-logo spdb">浦</div>
+                                            <div>
+                                                <div class="bank-card-name">浦发银行</div>
+                                                <div class="bank-card-type">SPDB</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="bank-card-number">6225 **** **** 7890</td>
+                                    <td>张三</td>
+                                    <td>4403****1234</td>
+                                    <td>借记卡</td>
+                                    <td>2026-04-05 08:30:00</td>
+                                    <td><span class="card-status bindcard">已绑定</span></td>
+                                    <td>
+                                        <span class="action-link">详情</span>
+                                        <span class="action-link danger">解绑</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Pagination -->
+                    <div class="pagination">
+                        <div class="pagination-info">共 5 条</div>
+                        <button class="page-btn" disabled>&lt;</button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn" disabled>&gt;</button>
+                        <select class="page-size-select">
+                            <option>10条/页</option>
+                            <option>20条/页</option>
+                            <option>50条/页</option>
+                        </select>
+                        <div class="page-jump">
+                            跳至 <input type="text" class="page-jump-input" value="1"> 页
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shared Tabs System -->
+    <script src="tabs-system.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            TabsSystem.init('bankcard', '银行卡管理', 'bankcard-management.html', '收银台');
+        });
+    </script>
+</body>
+</html>
